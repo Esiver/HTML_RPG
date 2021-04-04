@@ -40,6 +40,7 @@ pPos.setAttribute('id', 'player');
 
 // initialize player by appending a div
 document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y).appendChild(pPos);
+var playerPosition = '#row-'+player_one.pos_x+'_col-'+player_one.pos_y;
 
 //monster
 var monster = document.createElement('p');
@@ -48,14 +49,18 @@ document.querySelector('#row-5_col-2').appendChild(monster);
 
 var moo = document.createElement('p');
 moo.className = 'monster'
-//document.querySelector('#row-5_col-2').appendChild(moo);
+document.querySelector('#row-5_col-2').appendChild(moo);
+
+var tres = document.createElement('p');
+tres.className = 'treasure'
+document.querySelector('#row-5_col-2').appendChild(tres);
 
 // key presses & control
 function move (x, y) {
   player_one.pos_x = player_one.pos_x + x; //increment coordinates
   player_one.pos_y = player_one.pos_y + y;
   document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y).appendChild(pPos);
-  
+  playerPosition = '#row-'+player_one.pos_x+'_col-'+player_one.pos_y;
   check(); // do position check everytime we move
 
     // Todo: need logic for blocking...
@@ -79,19 +84,24 @@ function logKey(e) {
 
 // position check function
 function check() {
-  let playerPos = document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y);
+  let playerPos = document.querySelector(playerPosition);
   
-  let ms = playerPos.getElementsByClassName('monster');
-  console.table(ms);
+  let unitArray = [playerPos.getElementsByClassName('monster') ];
+  console.log(unitArray);
+  //console.table(unitArray);
+  monsterEncounter(unitArray)
+  console.log(playerPosition)
   
-  
-  if (playerPos.contains(monster)) {
-      monsterEncounter()
-  }
 }
 
 
 // encounters
-function monsterEncounter() {
-    console.log('rawr')
+function monsterEncounter(monsters) {
+  console.log(player_one.pos_x)
+  for (var i = 0; i < monsters.length; i++) {
+    //console.log(monster.length);
+    //console.log(i);
+  }
+  
 }
+
