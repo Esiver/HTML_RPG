@@ -142,12 +142,25 @@ function check() {
   
   // if monster health is 0 or below call it Dead!
 
+  /*
+  for (m =0 ; m < unitArray.length ; m++) {
+    if (unitArray[m].getAttribute("hp") <= 0 ) {
+      //unitArray[m].innerHTML = ' (SLAIN)';
+      document.querySelector('.monster-card_info').getElementsByClassName('loot')
+      console.log(unitArray[m].querySelector('loot'))
+    }
+  }
+  */
+
+
   unitArray.forEach((unitCard) => { 
-    if(unitCard.getAttribute('hp') < 0) {
-      unitCard.innerHTML = unitCard.innerHTML+' (DEAD)';
-      //let loot = Array.from()
+    if(unitCard.getAttribute('hp') <= 0) {
+      //unitCard.innerHTML = unitCard.innerHTML+' (DEAD)';
+      let unitLoot= unitCard.getElementsByClassName('loot').item('li')
+      unitLoot.style.display = 'flex';
     } 
   });
+  
 
 
   if (unitArray.length > 0) { // if array length is greater than 0 (there's monsters!) fire monster encounter event.
