@@ -66,7 +66,7 @@ class Monster {
 
 //Monster names
 var monsterNames = ['Mark', 'Ruben','James','Gerald','Emil','Jonas','Rascal','Rakanishu','Diablo','Enjubi','Mads','Frederik','Jasmin','Min','Haishengyi','Son Goku','Gohan','Farlig Bamse', 'Gottfred','Karl den Store','Lars','Bob'];
-
+var lootBox = []
 // populate world with angry monsters 🐉 
 var monsterArray = new Monster();
 for (var i = 0; i < FOE_NUM ; i++) {
@@ -78,6 +78,10 @@ for (var i = 0; i < FOE_NUM ; i++) {
   populateMonster.setAttribute('atk', monsterArray[i].atk );
 
   document.querySelector('#row-'+monsterArray[i].pos_x+'_col-'+monsterArray[i].pos_y).appendChild(populateMonster);
+
+  let loot = document.createElement('LI');
+
+
 }
 
 
@@ -122,35 +126,51 @@ function check() {
   let playerPos = document.querySelector(playerPosition);
   
   let unitArray = Array.from(playerPos.getElementsByClassName('monster') ); // get array of monsters
+  
+  // if monster health is 0 or below call it Dead!
+  console.log(unitArray);
+  unitArray.forEach((unit) => { 
+    if(unit.getAttribute('hp') < 0) {
+      unit.innerHTML = unit.innerHTML+' (DEAD)';
+    } 
+  });
+
+
   if (unitArray.length > 0) { // if array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(unitArray)
   }
 }
 
 
-function atkBtn(){
+function atkBtn(opponent){
   clearEncounters(); //clear old instances of monsters
-  check(); //get new instances of monsters
-
+  
+  
   pAtk = player_one.atk//get player attack
-    //get monster HP
+  
+  opponent.setAttribute("hp", Math.floor(opponent.getAttribute("hp")-pAtk));
+  console.log(opponent.getAttribute("hp"))
+  //opponent.hp - player_one.atk//get monster HP
   //apply damage
   //counterAttack
+
+  check(); //get new instances of monsters
 }
 
 // encounters
 function monsterEncounter(monsters) {
   for (var i = 0; i < monsters.length; i++) {
+    let monsterI = monsters[i];
     let monsterInstance = document.createElement("li");
     monsterInstance.className = "monster-card";
-    monsterInstance.innerHTML = 
-      '<div class="monster-card_info">'+monsters[i].innerHTML + "<span class='monster-info'>HP: " 
-      + monsters[i].getAttribute("hp") + ' ATK: ' + monsters[i].getAttribute("atk") + '</span></div> <img style="max-width:100px;" src=1.jpg>' ;
+    hp = monsters[i].getAttribute("hp")
+    atk = monsters[i].getAttribute("atk")
+    monsterInstance.innerHTML = '<div class="monster-card_info">'+ monsters[i].innerHTML + "<span class='monster-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>' ;
     
     let attackBtn = document.createElement("button");
     attackBtn.className = "attackBtn";
     attackBtn.innerHTML = "attack!"
-    attackBtn.addEventListener("click", function(){atkBtn()});
+    attackBtn.addEventListener("click", function(){atkBtn(monsterI)});
     monsterInstance.appendChild(attackBtn);
 
     document.querySelector('.monster-arena').appendChild(monsterInstance);

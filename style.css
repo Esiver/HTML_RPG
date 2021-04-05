@@ -17,12 +17,13 @@
 }
 .tile {
   
-  background-color: green;
+  background-color: black;
   height: var(--tile-height);
   width: var(--tile-width);
 }
 #player {
   background-color: red;
+  color: white;
   position: absolute;
   height: var(--tile-height);
   width: var(--tile-width);
