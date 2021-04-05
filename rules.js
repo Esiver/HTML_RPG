@@ -66,11 +66,14 @@ class Monster {
 
 //Monster names
 var monsterNames = ['Mark', 'Ruben','James','Gerald','Emil','Jonas','Rascal','Rakanishu','Diablo','Enjubi','Mads','Frederik','Jasmin','Min','Haishengyi','Son Goku','Gohan','Farlig Bamse', 'Gottfred','Karl den Store','Lars','Bob'];
+
+//Loot Class
+
 var lootBox = []
-// populate world with angry monsters 🐉 
+// populate world with angry monsters 🐉 and gold 💰 
 var monsterArray = new Monster();
 for (var i = 0; i < FOE_NUM ; i++) {
-  monsterArray[i] = new Monster(randomNumber(1, 39) , randomNumber(1, 39) , monsterNames[i], (randomNumber(90,110)+i*1.8), Math.floor((randomNumber(7,12)+i*1.1)));
+  monsterArray[i] = new Monster(randomNumber(1, 10) , randomNumber(1,10) , monsterNames[i], (randomNumber(90,110)+i*1.8), Math.floor((randomNumber(7,12)+i*1.1)));
   let populateMonster = document.createElement('p');
   populateMonster.className = 'monster';
   populateMonster.innerHTML = monsterArray[i].name;
@@ -79,9 +82,19 @@ for (var i = 0; i < FOE_NUM ; i++) {
 
   document.querySelector('#row-'+monsterArray[i].pos_x+'_col-'+monsterArray[i].pos_y).appendChild(populateMonster);
 
+  //Make loot for monster
   let loot = document.createElement('LI');
+  lootChance = randomNumber(1,100);
+  if(lootChance > 50) {
+    loot.className = 'loot gold';
+    loot.innerHTML = 100;
+  } else {
+    loot.className = 'loot trash';
+    loot.innerHTML = 'trash';
+  }
+  
 
-
+  populateMonster.appendChild(loot);
 }
 
 
@@ -121,17 +134,18 @@ function clearEncounters() {
   while (monsterArena.firstChild) {monsterArena.removeChild(monsterArena.lastChild);}
 }
 
-// position check function
+// position CHECK function
 function check() {
   let playerPos = document.querySelector(playerPosition);
   
   let unitArray = Array.from(playerPos.getElementsByClassName('monster') ); // get array of monsters
   
   // if monster health is 0 or below call it Dead!
-  console.log(unitArray);
-  unitArray.forEach((unit) => { 
-    if(unit.getAttribute('hp') < 0) {
-      unit.innerHTML = unit.innerHTML+' (DEAD)';
+
+  unitArray.forEach((unitCard) => { 
+    if(unitCard.getAttribute('hp') < 0) {
+      unitCard.innerHTML = unitCard.innerHTML+' (DEAD)';
+      //let loot = Array.from()
     } 
   });
 
@@ -146,10 +160,10 @@ function atkBtn(opponent){
   clearEncounters(); //clear old instances of monsters
   
   
-  pAtk = player_one.atk//get player attack
+  pAtk = player_one.atk + 100//get player attack
   
   opponent.setAttribute("hp", Math.floor(opponent.getAttribute("hp")-pAtk));
-  console.log(opponent.getAttribute("hp"))
+  
   //opponent.hp - player_one.atk//get monster HP
   //apply damage
   //counterAttack
