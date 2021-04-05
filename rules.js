@@ -23,18 +23,26 @@ for (w = 0; w < MAP_WIDTH; w++) {
         row.append(col);
   }
 }
+//Random function
+function randomNumber(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor( Math.random() * (max - min) + min);
+}
 
 // Classes
 class Player {
-  constructor(pos_x, pos_y, name) {
+  constructor(pos_x, pos_y, name, hp, atk) {
     this.pos_x = pos_x;
     this.pos_y = pos_y;
     this.name = name;
+    this.hp = hp;
+    this.atk = atk;
   }
 }
 
 //initialize players 👦 
-var player_one = new Player(1,1, 'player');
+var player_one = new Player(1,1, 'player', 100, 10);
 
 var pPos = document.createElement('div');
 pPos.innerHTML = player_one.name;
@@ -62,7 +70,7 @@ var monsterNames = ['Mark', 'Ruben','James','Gerald','Emil','Jonas','Rascal','Ra
 // populate world with angry monsters 🐉 
 var monsterArray = new Monster();
 for (var i = 0; i < FOE_NUM ; i++) {
-  monsterArray[i] = new Monster(Math.floor(i*1.3) , Math.floor(i*1.4) , monsterNames[i], 100, 10);
+  monsterArray[i] = new Monster(randomNumber(1, 39) , randomNumber(1, 39) , monsterNames[i], (randomNumber(90,110)+i*1.8), Math.floor((randomNumber(7,12)+i*1.1)));
   let populateMonster = document.createElement('p');
   populateMonster.className = 'monster';
   populateMonster.innerHTML = monsterArray[i].name;
@@ -72,17 +80,6 @@ for (var i = 0; i < FOE_NUM ; i++) {
   document.querySelector('#row-'+monsterArray[i].pos_x+'_col-'+monsterArray[i].pos_y).appendChild(populateMonster);
 }
 
-var monster = document.createElement('p');
-monster.className = 'monster'
-monster.innerHTML = 'KASPER';
-monster.setAttribute('hp', 150); 
-document.querySelector('#row-5_col-2').appendChild(monster);
-
-var moo = document.createElement('p');
-moo.className = 'monster';
-moo.setAttribute('hp', 100); 
-moo.innerHTML = 'BOB';
-document.querySelector('#row-5_col-2').appendChild(moo);
 
 var tres = document.createElement('p');
 tres.className = 'treasure'
@@ -92,27 +89,25 @@ document.querySelector('#row-5_col-2').appendChild(tres);
 function move (x, y) {
   player_one.pos_x = player_one.pos_x + x; //increment coordinates
   player_one.pos_y = player_one.pos_y + y;
-  document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y).appendChild(pPos);
+  document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y).appendChild(pPos); //append player to new tile
   playerPosition = '#row-'+player_one.pos_x+'_col-'+player_one.pos_y;
+
   clearEncounters(); //clear encounters so new can come!
   check(); // do position check everytime we move
-  
-
-    // Todo: need logic for blocking...
 }
 
 document.addEventListener('keydown', logKey);
 function logKey(e) {
-  if (e.code == 'KeyA'){
+  if (e.code == 'KeyA' && player_one.pos_x != 0 ){
     move(-1,0);
   }
-  else if (e.code == 'KeyD') {
+  else if (e.code == 'KeyD' && player_one.pos_x < MAP_WIDTH-1) {
     move(1,0);
   }
-  else if (e.code == 'KeyW') {
+  else if (e.code == 'KeyW' && player_one.pos_y  != 0 ) {
     move(0,-1);
   }
-  else if (e.code == 'KeyS') {
+  else if (e.code == 'KeyS' && player_one.pos_y < MAP_HEIGHT-1 ) {
     move(0,1);
   }
 }
@@ -132,15 +127,33 @@ function check() {
   }
 }
 
+
+function atkBtn(){
+  clearEncounters(); //clear old instances of monsters
+  check(); //get new instances of monsters
+
+  pAtk = player_one.atk//get player attack
+    //get monster HP
+  //apply damage
+  //counterAttack
+}
+
 // encounters
 function monsterEncounter(monsters) {
   for (var i = 0; i < monsters.length; i++) {
     let monsterInstance = document.createElement("li");
     monsterInstance.className = "monster-card";
-    monsterInstance.innerHTML = monsters[i].innerHTML + " " + monsters[i].getAttribute("hp");
+    monsterInstance.innerHTML = 
+      '<div class="monster-card_info">'+monsters[i].innerHTML + "<span class='monster-info'>HP: " 
+      + monsters[i].getAttribute("hp") + ' ATK: ' + monsters[i].getAttribute("atk") + '</span></div> <img style="max-width:100px;" src=1.jpg>' ;
+    
+    let attackBtn = document.createElement("button");
+    attackBtn.className = "attackBtn";
+    attackBtn.innerHTML = "attack!"
+    attackBtn.addEventListener("click", function(){atkBtn()});
+    monsterInstance.appendChild(attackBtn);
 
     document.querySelector('.monster-arena').appendChild(monsterInstance);
   }
   
 }
-
