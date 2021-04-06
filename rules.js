@@ -54,7 +54,8 @@ var playerPosition = '#row-'+player_one.pos_x+'_col-'+player_one.pos_y;
 
 //Monster Class and populator
 class Monster {
-  constructor(pos_x, pos_y, name, hp, atk) {
+  constructor(alive, pos_x, pos_y, name, hp, atk) {
+    this.alive = alive;
     this.pos_x = pos_x;
     this.pos_y = pos_y;
     this.name = name;
@@ -73,23 +74,26 @@ var lootBox = []
 // populate world with angry monsters 🐉 and gold 💰 
 var monsterArray = new Monster();
 for (var i = 0; i < FOE_NUM ; i++) {
-  monsterArray[i] = new Monster(randomNumber(1, 10) , randomNumber(1,10) , monsterNames[i], (randomNumber(90,110)+i*1.8), Math.floor((randomNumber(7,12)+i*1.1)));
+  monsterArray[i] = new Monster(true, randomNumber(1, 10) , randomNumber(1,10) , monsterNames[i], (randomNumber(90,110)+i*1.8), Math.floor((randomNumber(7,12)+i*1.1)));
   let populateMonster = document.createElement('p');
   populateMonster.className = 'monster';
   populateMonster.innerHTML = monsterArray[i].name;
+  populateMonster.setAttribute('alive', 'true');
   populateMonster.setAttribute('hp', monsterArray[i].hp );
   populateMonster.setAttribute('atk', monsterArray[i].atk );
 
   document.querySelector('#row-'+monsterArray[i].pos_x+'_col-'+monsterArray[i].pos_y).appendChild(populateMonster);
 
   //Make loot for monster
-  let loot = document.createElement('LI');
+  let loot = document.createElement('DIV');
   lootChance = randomNumber(1,100);
   if(lootChance > 50) {
-    loot.className = 'loot gold';
-    loot.innerHTML = 100;
+    loot.className = 'loot';
+    loot.setAttribute('quantity', 100)
+    loot.innerHTML = 'gold';
   } else {
-    loot.className = 'loot trash';
+    loot.className = 'loot';
+    loot.setAttribute('quantity', 1)
     loot.innerHTML = 'trash';
   }
   
@@ -140,24 +144,16 @@ function check() {
   
   let unitArray = Array.from(playerPos.getElementsByClassName('monster') ); // get array of monsters
   
-  // if monster health is 0 or below call it Dead!
-
-  /*
-  for (m =0 ; m < unitArray.length ; m++) {
-    if (unitArray[m].getAttribute("hp") <= 0 ) {
-      //unitArray[m].innerHTML = ' (SLAIN)';
-      document.querySelector('.monster-card_info').getElementsByClassName('loot')
-      console.log(unitArray[m].querySelector('loot'))
-    }
-  }
-  */
-
+  // if monster health is 0 or below call it Dead and show loot
 
   unitArray.forEach((unitCard) => { 
     if(unitCard.getAttribute('hp') <= 0) {
+      unitCard.setAttribute('alive', 'false');
       //unitCard.innerHTML = unitCard.innerHTML+' (DEAD)';
       let unitLoot= unitCard.getElementsByClassName('loot').item('li')
       unitLoot.style.display = 'flex';
+    
+      grabLoot(playerPosition);
     } 
   });
   
@@ -165,6 +161,7 @@ function check() {
 
   if (unitArray.length > 0) { // if array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(unitArray)
+    
   }
 }
 
@@ -190,6 +187,7 @@ function monsterEncounter(monsters) {
     let monsterI = monsters[i];
     let monsterInstance = document.createElement("li");
     monsterInstance.className = "monster-card";
+    monsterInstance.setAttribute('id', 'card-'+playerPosition.substring(1));
     hp = monsters[i].getAttribute("hp")
     atk = monsters[i].getAttribute("atk")
     monsterInstance.innerHTML = '<div class="monster-card_info">'+ monsters[i].innerHTML + "<span class='monster-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>' ;
@@ -201,6 +199,24 @@ function monsterEncounter(monsters) {
     monsterInstance.appendChild(attackBtn);
 
     document.querySelector('.monster-arena').appendChild(monsterInstance);
+
+    if (monsters[i].getAttribute('alive') == 'false') {
+      console.log('here is your free loot')
+      console.log(document.querySelector('#card-'+playerPosition.substring(1)).getElementsByClassName('loot')[0])
+    }
+    //console.log(document.querySelector('#card-'+playerPosition.substring(1)))
+    //return monsterInstance    
   }
-  
 }
+
+// looting 
+function grabLoot(playerPosition){
+  //console.log(document.getElementById('card-'+playerPosition))
+  //document.getElementById('card-'+playerPosition.substring(1)).style.backgroundColor = 'green'
+  console.log('#card-'+playerPosition.substring(1))
+
+  //document.querySelector('#card-row-1_col-1').style.backgroundColor='green'
+}
+
+
+//equip
