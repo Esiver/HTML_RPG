@@ -85,7 +85,7 @@ for (var i = 0; i < FOE_NUM ; i++) {
   document.querySelector('#row-'+monsterArray[i].pos_x+'_col-'+monsterArray[i].pos_y).appendChild(populateMonster);
 
   //Make loot for monster
-  let loot = document.createElement('DIV');
+  let loot = document.createElement('BUTTON');
   lootChance = randomNumber(1,100);
   if(lootChance > 50) {
     loot.className = 'loot';
@@ -97,7 +97,7 @@ for (var i = 0; i < FOE_NUM ; i++) {
     loot.innerHTML = 'trash';
   }
   
-
+  loot.onclick = function(){grabLoot(playerPosition);}
   populateMonster.appendChild(loot);
 }
 
@@ -132,47 +132,31 @@ function logKey(e) {
     move(0,1);
   }
 }
-// clear encounters function
-function clearEncounters() {
+
+function clearEncounters() { // clears all monsters from Encounters-section 
   let monsterArena = document.querySelector('.monster-arena');
   while (monsterArena.firstChild) {monsterArena.removeChild(monsterArena.lastChild);}
 }
 
 // position CHECK function
 function check() {
-  let playerPos = document.querySelector(playerPosition);
+  let playerPos = document.querySelector(playerPosition); //get player position
+  let unitArray = Array.from(playerPos.getElementsByClassName('monster') ); // get array of all monsters on player position
   
-  let unitArray = Array.from(playerPos.getElementsByClassName('monster') ); // get array of monsters
-  
-  // if monster health is 0 or below call it Dead and show loot
-
-  unitArray.forEach((unitCard) => { 
-    if(unitCard.getAttribute('hp') <= 0) {
-      unitCard.setAttribute('alive', 'false');
-      //unitCard.innerHTML = unitCard.innerHTML+' (DEAD)';
-      let unitLoot= unitCard.getElementsByClassName('loot').item('li')
-      unitLoot.style.display = 'flex';
-    
-      grabLoot(playerPosition);
-    } 
+  unitArray.forEach((unit) => {  // if monster health is 0 or below call it Dead
+    if(unit.getAttribute('hp') <= 0) {
+      unit.setAttribute('alive', 'false');} 
   });
   
-
-
   if (unitArray.length > 0) { // if array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(unitArray)
-    
   }
 }
 
 
 function atkBtn(opponent){
   clearEncounters(); //clear old instances of monsters
-  
-  
-  pAtk = player_one.atk + 100//get player attack
-  
-  opponent.setAttribute("hp", Math.floor(opponent.getAttribute("hp")-pAtk));
+  opponent.setAttribute("hp", Math.floor(opponent.getAttribute("hp") - player_one.atk));
   
   //opponent.hp - player_one.atk//get monster HP
   //apply damage
@@ -181,7 +165,6 @@ function atkBtn(opponent){
   check(); //get new instances of monsters
 }
 
-// encounters
 function monsterEncounter(monsters) {
   for (var i = 0; i < monsters.length; i++) {
     let monsterI = monsters[i];
@@ -201,21 +184,17 @@ function monsterEncounter(monsters) {
     document.querySelector('.monster-arena').appendChild(monsterInstance);
 
     if (monsters[i].getAttribute('alive') == 'false') {
-      console.log('here is your free loot')
-      console.log(document.querySelector('#card-'+playerPosition.substring(1)).getElementsByClassName('loot')[0])
+      let lootbox = document.querySelector('#card-'+playerPosition.substring(1)).getElementsByClassName('loot')[0]; //card specific lootbox (not on map)
+      lootbox.style.display = 'flex'
+      lootbox.onclick = function(){grabLoot('#card-'+playerPosition.substring(1));}
     }
-    //console.log(document.querySelector('#card-'+playerPosition.substring(1)))
-    //return monsterInstance    
   }
 }
 
 // looting 
-function grabLoot(playerPosition){
-  //console.log(document.getElementById('card-'+playerPosition))
-  //document.getElementById('card-'+playerPosition.substring(1)).style.backgroundColor = 'green'
-  console.log('#card-'+playerPosition.substring(1))
-
-  //document.querySelector('#card-row-1_col-1').style.backgroundColor='green'
+function grabLoot(lootPosition){
+  console.log(lootPosition)
+  // så skal den bare give loot til player inventory (Skal laves) og fjerne loot fra monster inventory
 }
 
 
