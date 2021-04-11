@@ -1,6 +1,6 @@
 var MAP_HEIGHT = 40;
 var MAP_WIDTH = 40;
-var FOE_NUM = 20
+var FOE_NUM = 30
 
 const tileContainer = document.querySelector(".tileContainer");
 
@@ -13,21 +13,27 @@ for (w = 0; w < MAP_WIDTH; w++) {
 
   tileContainer.append(row);
 
-    // for y axis
-    for (h = 0; h < MAP_HEIGHT; h++) {
-        var col = document.createElement("li");
-        var colId = "row-" + w + "_col-" + h;
-        col.className = "tile";
+  // for y axis
+  for (h = 0; h < MAP_HEIGHT; h++) {
+    var col = document.createElement("li");
+    var colId = "row-" + w + "_col-" + h;
+    col.className = "tile";
 
-        col.setAttribute("id", colId);
-        row.append(col);
+    col.setAttribute("id", colId);
+    row.append(col);
   }
 }
 //Random function
 function randomNumber(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor( Math.random() * (max - min) + min);
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
+//consolelog!
+function status(message) {
+  document.getElementById('console').innerHTML = 'Log (<strong>' + playerPosition.substring(0) + '</strong>): <br>' + message
+  return message;
 }
 
 // Classes
@@ -42,15 +48,22 @@ class Player {
 }
 
 //initialize players 👦 
-var player_one = new Player(1,1, 'player', 100, 10);
+var player_one = new Player(1, 1, 'player', 100, 10);
 
 var pPos = document.createElement('div');
 pPos.innerHTML = player_one.name;
 pPos.setAttribute('id', 'player');
 
 // initialize player by appending a div
-document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y).appendChild(pPos);
-var playerPosition = '#row-'+player_one.pos_x+'_col-'+player_one.pos_y;
+document.querySelector('#row-' + player_one.pos_x + '_col-' + player_one.pos_y).appendChild(pPos);
+var playerPosition = '#row-' + player_one.pos_x + '_col-' + player_one.pos_y;
+// cards at position 
+const cardAtPosition = () => {
+  return playerPosition + '-card'
+} //get card id
+const monsterAtPosition = () => {
+  return Array.from(document.querySelector(playerPosition).getElementsByClassName('monster'))
+} //get array of monsters
 
 //Monster Class and populator
 class Monster {
@@ -62,32 +75,32 @@ class Monster {
     this.hp = hp;
     this.atk = atk;
   }
-  
+
 }
 
 //Monster names
-var monsterNames = ['Mark', 'Ruben','James','Gerald','Emil','Jonas','Rascal','Rakanishu','Diablo','Enjubi','Mads','Frederik','Jasmin','Min','Haishengyi','Son Goku','Gohan','Farlig Bamse', 'Gottfred','Karl den Store','Lars','Bob'];
+var monsterNames = ['Mark', 'Ruben', 'James', 'Gerald', 'Emil', 'Jonas', 'Rascal', 'Rakanishu', 'Diablo', 'Enjubi', 'Mads', 'Frederik', 'Jasmin', 'Min', 'Haishengyi', 'Son Goku', 'Gohan', 'Farlig Bamse', 'Gottfred', 'Karl den Store', 'Lars', 'Bob'];
 
 //Loot Class
 
 var lootBox = []
 // populate world with angry monsters 🐉 and gold 💰 
 var monsterArray = new Monster();
-for (var i = 0; i < FOE_NUM ; i++) {
-  monsterArray[i] = new Monster(true, randomNumber(1, 10) , randomNumber(1,10) , monsterNames[i], (randomNumber(90,110)+i*1.8), Math.floor((randomNumber(7,12)+i*1.1)));
+for (var i = 0; i < FOE_NUM; i++) {
+  monsterArray[i] = new Monster(true, randomNumber(1, 6), randomNumber(1, 6), monsterNames[i], (randomNumber(90, 110) + i * 1.8), Math.floor((randomNumber(7, 12) + i * 1.1)));
   let populateMonster = document.createElement('p');
   populateMonster.className = 'monster';
   populateMonster.innerHTML = monsterArray[i].name;
   populateMonster.setAttribute('alive', 'true');
-  populateMonster.setAttribute('hp', monsterArray[i].hp );
-  populateMonster.setAttribute('atk', monsterArray[i].atk );
+  populateMonster.setAttribute('hp', monsterArray[i].hp);
+  populateMonster.setAttribute('atk', monsterArray[i].atk);
 
-  document.querySelector('#row-'+monsterArray[i].pos_x+'_col-'+monsterArray[i].pos_y).appendChild(populateMonster);
+  document.querySelector('#row-' + monsterArray[i].pos_x + '_col-' + monsterArray[i].pos_y).appendChild(populateMonster);
 
   //Make loot for monster
   let loot = document.createElement('BUTTON');
-  lootChance = randomNumber(1,100);
-  if(lootChance > 50) {
+  lootChance = randomNumber(1, 100);
+  if (lootChance > 50) {
     loot.className = 'loot';
     loot.setAttribute('quantity', 100)
     loot.innerHTML = 'gold';
@@ -96,68 +109,61 @@ for (var i = 0; i < FOE_NUM ; i++) {
     loot.setAttribute('quantity', 1)
     loot.innerHTML = 'trash';
   }
-  
-  loot.onclick = function(){grabLoot(playerPosition);}
+
+  loot.onclick = function () {
+    grabLoot(playerPosition);
+  }
   populateMonster.appendChild(loot);
 }
 
-
-var tres = document.createElement('p');
-tres.className = 'treasure'
-document.querySelector('#row-5_col-2').appendChild(tres);
-
 // key presses & control
-function move (x, y) {
+function move(x, y) {
   player_one.pos_x = player_one.pos_x + x; //increment coordinates
   player_one.pos_y = player_one.pos_y + y;
-  document.querySelector('#row-'+player_one.pos_x+'_col-'+player_one.pos_y).appendChild(pPos); //append player to new tile
-  playerPosition = '#row-'+player_one.pos_x+'_col-'+player_one.pos_y;
+  document.querySelector('#row-' + player_one.pos_x + '_col-' + player_one.pos_y).appendChild(pPos); //append player to new tile
+  playerPosition = '#row-' + player_one.pos_x + '_col-' + player_one.pos_y;
 
   clearEncounters(); //clear encounters so new can come!
   check(); // do position check everytime we move
 }
 
 document.addEventListener('keydown', logKey);
+
 function logKey(e) {
-  if (e.code == 'KeyA' && player_one.pos_x != 0 ){
-    move(-1,0);
-  }
-  else if (e.code == 'KeyD' && player_one.pos_x < MAP_WIDTH-1) {
-    move(1,0);
-  }
-  else if (e.code == 'KeyW' && player_one.pos_y  != 0 ) {
-    move(0,-1);
-  }
-  else if (e.code == 'KeyS' && player_one.pos_y < MAP_HEIGHT-1 ) {
-    move(0,1);
+  if (e.code == 'KeyA' && player_one.pos_x != 0) {
+    move(-1, 0);
+  } else if (e.code == 'KeyD' && player_one.pos_x < MAP_WIDTH - 1) {
+    move(1, 0);
+  } else if (e.code == 'KeyW' && player_one.pos_y != 0) {
+    move(0, -1);
+  } else if (e.code == 'KeyS' && player_one.pos_y < MAP_HEIGHT - 1) {
+    move(0, 1);
   }
 }
 
 function clearEncounters() { // clears all monsters from Encounters-section 
   let monsterArena = document.querySelector('.monster-arena');
-  while (monsterArena.firstChild) {monsterArena.removeChild(monsterArena.lastChild);}
-}
-
-// position CHECK function
-function check() {
-  let playerPos = document.querySelector(playerPosition); //get player position
-  let unitArray = Array.from(playerPos.getElementsByClassName('monster') ); // get array of all monsters on player position
-  
-  unitArray.forEach((unit) => {  // if monster health is 0 or below call it Dead
-    if(unit.getAttribute('hp') <= 0) {
-      unit.setAttribute('alive', 'false');} 
-  });
-  
-  if (unitArray.length > 0) { // if array length is greater than 0 (there's monsters!) fire monster encounter event.
-    monsterEncounter(unitArray)
+  while (monsterArena.firstChild) {
+    monsterArena.removeChild(monsterArena.lastChild);
   }
 }
 
+// position CHECK function, updates cards according to map units. 
+function check() {
+  monsterAtPosition().forEach((unit) => { //check all, if monster health is 0 or below call it Dead
+    if (unit.getAttribute('hp') <= 0) {
+      unit.setAttribute('alive', 'false');
+    }
+  });
+  if (monsterAtPosition().length > 0) { // if monster array length is greater than 0 (there's monsters!) fire monster encounter event.
+    monsterEncounter(monsterAtPosition())
+  }
+}
 
-function atkBtn(opponent){
+function atkBtn(opponent) {
   clearEncounters(); //clear old instances of monsters
-  opponent.setAttribute("hp", Math.floor(opponent.getAttribute("hp") - player_one.atk));
-  
+
+  handleDmg(player_one.name, opponent, player_one.atk, 'normal')
   //opponent.hp - player_one.atk//get monster HP
   //apply damage
   //counterAttack
@@ -165,37 +171,70 @@ function atkBtn(opponent){
   check(); //get new instances of monsters
 }
 
-function monsterEncounter(monsters) {
-  for (var i = 0; i < monsters.length; i++) {
-    let monsterI = monsters[i];
-    let monsterInstance = document.createElement("li");
-    monsterInstance.className = "monster-card";
-    monsterInstance.setAttribute('id', 'card-'+playerPosition.substring(1));
-    hp = monsters[i].getAttribute("hp")
-    atk = monsters[i].getAttribute("atk")
-    monsterInstance.innerHTML = '<div class="monster-card_info">'+ monsters[i].innerHTML + "<span class='monster-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>' ;
+function handleDmg(giver, receiver, amount, type) {
+  receiver.setAttribute("hp", Math.floor(receiver.getAttribute("hp") - amount * 6));
+  status(giver + ' attacks ' + receiver.innerHTML + ' for ' + amount + ' ' + type + ' damage.')
+}
+
+function createAttackBtn(target, targetDOM) {
+  let attackBtn = document.createElement("BUTTON");
+  attackBtn.className = "attackBtn";
+  attackBtn.innerHTML = "Attack!"
+  attackBtn.addEventListener("click", function () {
+    atkBtn(target)
+  });
+  targetDOM.appendChild(attackBtn);
+}
+
+function createUnitCard(mapHTML, hp, atk, classType, id) {
+  let cardDOM = document.createElement("li");
+  cardDOM.className = classType + '-card';
+  cardDOM.setAttribute('id', id);
+  cardDOM.innerHTML = '<div class=' + classType + '_info"> <name>' + mapHTML + "</name><span class=" + classType + "-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>';
+  
+  // only allow attacking if monster--- Maybe change in future?
+  if (classType == 'monster') {
+    document.querySelector('.monster-arena').appendChild(cardDOM);
     
-    let attackBtn = document.createElement("button");
-    attackBtn.className = "attackBtn";
-    attackBtn.innerHTML = "attack!"
-    attackBtn.addEventListener("click", function(){atkBtn(monsterI)});
-    monsterInstance.appendChild(attackBtn);
+  }
+  if (classType == 'trader') {
+    console.log("You've met a trader.")
+  }
+  return cardDOM
+}
 
-    document.querySelector('.monster-arena').appendChild(monsterInstance);
-
-    if (monsters[i].getAttribute('alive') == 'false') {
-      let lootbox = document.querySelector('#card-'+playerPosition.substring(1)).getElementsByClassName('loot')[0]; //card specific lootbox (not on map)
-      lootbox.style.display = 'flex'
-      lootbox.onclick = function(){grabLoot('#card-'+playerPosition.substring(1));}
+function monsterEncounter(monsters) { // takes array of monsters
+  for (var i = 0; i < monsters.length; i++) {
+    let monsterDOM = createUnitCard(monsters[i].innerHTML, monsters[i].getAttribute('hp'), monsters[i].getAttribute('atk'), 'monster', playerPosition.substring(1) + '-card-'+i)
+    createAttackBtn(monsters[i], monsterDOM);
+    if (monsters[i].getAttribute('alive') == 'false') { //do something if monster dead.
+      lootBoxes = document.querySelector('#' + monsters[i].parentNode.getAttribute('id') + '-card-'+i).getElementsByClassName('loot');
+      Array.from(lootBoxes).forEach(function(ele){
+        ele.style.display = 'flex';
+        ele.addEventListener('click', function(){grabLoot(ele, ele.getAttribute('quantity'))})
+      })
+      
     }
   }
 }
-
+  
 // looting 
-function grabLoot(lootPosition){
-  console.log(lootPosition)
-  // så skal den bare give loot til player inventory (Skal laves) og fjerne loot fra monster inventory
+function grabLoot(lootElement, quantity) {
+  console.log(lootElement, quantity)
+  //let loot =document.querySelector(lootPosition).getElementsByClassName('loot')[0];
+  
+  let grabbedLoot = document.createElement('li')
+  grabbedLoot.innerHTML = lootElement.textContent
+  console.log(grabbedLoot.textContent)
+  let playerInventory = document.querySelector('#inventory').appendChild(grabbedLoot)
+
+  lootElement.remove() //remove from card
+  document.querySelector(playerPosition).getElementsByClassName('loot')[0].remove() //remove from map monster
+
+  handleInventory()
 }
 
-
+function handleInventory() { //sort inventory, stack coins, etc.
+  console.log('handle inventory')
+}
 //equip

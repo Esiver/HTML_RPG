@@ -9,6 +9,16 @@
     --tile-width: 15px;
     --tile-height: 15px;
 }
+.settings {
+  width: 300px;
+  background-color: grey;
+}
+#console {
+  background-color: rgb(199, 199, 199);
+  width: 100%;
+  min-height: 100px;
+}
+
 .tileContainer {
   margin:0;
   padding:5px;
