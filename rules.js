@@ -102,11 +102,13 @@ for (var i = 0; i < FOE_NUM; i++) {
   lootChance = randomNumber(1, 100);
   if (lootChance > 50) {
     loot.className = 'loot';
-    loot.setAttribute('quantity', 100)
-    loot.innerHTML = 'gold';
+    loot.setAttribute('quantity', randomNumber(1,30));
+    loot.setAttribute('type', 'gold')
+    loot.innerHTML = 'Coin 💰';
   } else {
     loot.className = 'loot';
     loot.setAttribute('quantity', 1)
+    loot.setAttribute('type', 'trash')
     loot.innerHTML = 'trash';
   }
 
@@ -211,6 +213,7 @@ function monsterEncounter(monsters) { // takes array of monsters
       lootBoxes = document.querySelector('#' + monsters[i].parentNode.getAttribute('id') + '-card-'+i).getElementsByClassName('loot');
       Array.from(lootBoxes).forEach(function(ele){
         ele.style.display = 'flex';
+
         ele.addEventListener('click', function(){grabLoot(ele, ele.getAttribute('quantity'))})
       })
       
@@ -220,12 +223,21 @@ function monsterEncounter(monsters) { // takes array of monsters
   
 // looting 
 function grabLoot(lootElement, quantity) {
-  console.log(lootElement, quantity)
-  //let loot =document.querySelector(lootPosition).getElementsByClassName('loot')[0];
   
   let grabbedLoot = document.createElement('li')
+  if(lootElement.getAttribute('type') == 'gold'){
+    console.log('jubii')
+    grabbedLoot.className = 'gold'
+    grabbedLoot.setAttribute('quantity', lootElement.getAttribute('quantity'))
+  }
+  if (lootElement.getAttribute('type') == 'trash') {
+    grabbedLoot.className = 'trash'
+  }
+  if (lootElement.getAttribute('type') == 'trash') {
+    grabbedLoot.className = 'trash'
+  }
+  grabbedLoot.nodeType
   grabbedLoot.innerHTML = lootElement.textContent
-  console.log(grabbedLoot.textContent)
   let playerInventory = document.querySelector('#inventory').appendChild(grabbedLoot)
 
   lootElement.remove() //remove from card
@@ -235,6 +247,40 @@ function grabLoot(lootElement, quantity) {
 }
 
 function handleInventory() { //sort inventory, stack coins, etc.
-  console.log('handle inventory')
+  let inventory = document.querySelector('#inventory'); //get inventory
+  let goldArray = inventory.getElementsByClassName('gold'); // get new gold in inventory
+  
+  let wallet = 0;
+  if (goldArray.length > 1) {
+    goldArray[0].setAttribute('quantity', Math.floor(goldArray[0].getAttribute('quantity')) + Math.floor(goldArray[1].getAttribute('quantity'))) 
+    goldArray[1].remove()
+    goldArray[0].innerHTML = goldArray[0].getAttribute('quantity') + ' coins'
+  }
+  else {
+    console.log('no')
+    let gold
+    walletElement = document.createElement('li');
+    walletElement.className = 'gold'
+    walletElement.innerHTML = wallet
+    inventory.appendChild(walletElement); 
+  }
+  //for (let i = 0; i < goldArray.length; i++) { //sum all money in inventory
+  //  wallet += parseInt(goldArray[i].getAttribute('quantity'));
+  
+//
+  //  
+  //}
+  //inventory.appendChild(walletElement); 
+  //console.log(wallet);
+
+//  function stackStackable(stack){
+//    Array.from(stack).forEach(
+//      function(pc){
+//        console.log(pc.length)      
+//      }
+//    );  
+//  }
+  //stackStackable(goldArray);
+  //goldArray.forEach((coin)=> {console.log('money money monet')});
 }
 //equip
