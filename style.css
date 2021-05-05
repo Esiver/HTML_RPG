@@ -67,3 +67,52 @@
 .loot {
   display: none;
 }
+#inventory li {
+  border: 1px solid black;
+  margin: 3px;
+  padding: 3px;
+  list-style: none;
+}
+#inventory li button {float: right;}
+#inventory li li {
+  border: none;
+  margin-left: 3ch;
+}
+#inventory .weapon {
+  background-color: #2f0000;
+  color: white;
+}
+
+.player-equipment {
+  display: flex;
+  flex-direction:column
+}
+.player-equipment-row {
+  display: flex;
+  flex-direction:row;
+  justify-content: center;
+}
+.equipment-slot {
+  background-color: blanchedalmond;
+  width: 30px;
+  height:30px;
+  margin: 5px;
+}
+
+#equip-helm {
+  background-image: url('helm_slot.png');
+}
+#equip-body {
+  background-image: url('chest_slot.png');
+}
+#equip-legs {
+  background-image: url('leg_slot.png');
+}
+
+#equip-lhand {
+  background-image: url('lhand_slot.png');
+}
+
+#equip-rhand {
+  background-image: url('rhand_slot.png');
+}

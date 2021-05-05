@@ -107,7 +107,7 @@ for (var i = 0; i < FOE_NUM; i++) {
   loot.className = "loot"
   lootChance = randomNumber(1, 100);
 
-  if (lootChance > 80 && lootChance < 85) {
+  if (lootChance > 80 && lootChance < 85) { //todo: create loot-type functions/classes
     loot.setAttribute('quantity', randomNumber(1,30));
     loot.setAttribute('type', 'gold')
     loot.innerHTML = 'Coin 💰';
@@ -119,6 +119,7 @@ for (var i = 0; i < FOE_NUM; i++) {
   {
     loot.setAttribute('quantity',1)
     loot.setAttribute('type','weapon')
+    loot.setAttribute('slot', 'lhand')
     loot.setAttribute('dmg',randomNumber(15, 20))
     loot.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
   }
@@ -247,19 +248,32 @@ function grabLoot(lootElement, quantity) {
     grabbedLoot.className = 'trash'
   }
   if (lootElement.getAttribute('type') == 'weapon') {
+
     grabbedLoot.className = 'weapon';
     grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
 
+
     let equipBtn = document.createElement('button');
-    equipBtn.className = 'equipBtn'
-    equipBtn.innerHTML = 'Equip '+grabbedLoot.innerHTML;
+    equipBtn.className = 'equipBtn';
+    equipBtn.innerHTML = 'Equip ';
     
     grabbedLoot.innerHTML = lootElement.textContent
+    grabbedLoot.setAttribute('slot',lootElement.getAttribute('slot'))
     grabbedLoot.append(equipBtn)
+
+    //create inventory info 
+    atkInfo = document.createElement('li')
+    atkInfo.innerHTML = 'Attack: '+grabbedLoot.getAttribute('dmg')
+    slotInfo = document.createElement('li')
+    slotInfo.innerHTML = 'Slot: '+grabbedLoot.getAttribute('slot')
+
+    grabbedLoot.append(atkInfo, slotInfo)
     
     document.querySelector('#inventory').appendChild(grabbedLoot)
+
+    equipBtn.addEventListener('click', function() {equip(grabbedLoot)})
   }
-  equipBtn.addEventListener('click', function() {console.log(grabbedLoot)})
+  
 
 
   lootElement.remove() //remove from card
@@ -280,6 +294,6 @@ function handleInventory() { //sort inventory, stack coins, etc.
   }
 }
 
-function equip() {
-  console.log('equipping')
+function equip(grabbedLoot) {
+  console.log(grabbedLoot)
 }
