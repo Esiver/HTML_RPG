@@ -88,7 +88,27 @@ var monsterNames = ['Mark', 'Ruben', 'James', 'Gerald', 'Emil', 'Jonas', 'Rascal
 
 //Loot Class
 var weaponNames = ['Sword of Truths', 'Sword of a Thousand Truths', 'Mace', 'Broken Mace','Knife','Dull Knife','Morning Star','Stick','Sharp Stone','Broken Bottle','Wand','Excallibur'];
-var lootBox = []
+
+class weapon { // todo: also create classes for other equipment + trash.
+  constructor(type, dmg, title ) {
+    this.type = type;
+    this.dmg = dmg;
+    this.title = title;
+  }
+  static slot = 'lhand'
+  static quantity = 1;
+  createWeapon() {
+    let outputWeapon = document.createElement('BUTTON');
+    outputWeapon.className = 'loot';
+    outputWeapon.setAttribute('type','weapon')
+    outputWeapon.setAttribute('slot', 'lhand')
+    outputWeapon.setAttribute('dmg',randomNumber(15, 20))
+    outputWeapon.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
+    
+    return outputWeapon;
+  }
+}
+
 // populate world with angry monsters 🐉 and gold 💰 
 var monsterArray = new Monster();
 for (var i = 0; i < FOE_NUM; i++) {
@@ -107,21 +127,27 @@ for (var i = 0; i < FOE_NUM; i++) {
   loot.className = "loot"
   lootChance = randomNumber(1, 100);
 
-  if (lootChance > 80 && lootChance < 85) { //todo: create loot-type functions/classes
+  if (lootChance > 99 && lootChance < 100) { //todo: create loot-type functions/classes
     loot.setAttribute('quantity', randomNumber(1,30));
     loot.setAttribute('type', 'gold')
     loot.innerHTML = 'Coin 💰';
-  } else if (lootChance < 26 && lootChance > 25) {
+  } else if (lootChance > 97 && lootChance < 98) {
     loot.setAttribute('quantity', 1)
     loot.setAttribute('type', 'trash')
     loot.innerHTML = 'trash';
-  } else
+  } else if (lootChance < 97)
   {
     loot.setAttribute('quantity',1)
-    loot.setAttribute('type','weapon')
-    loot.setAttribute('slot', 'lhand')
-    loot.setAttribute('dmg',randomNumber(15, 20))
-    loot.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
+    if (lootChance >99){
+      loot.setAttribute('type','weapon')
+      loot.setAttribute('slot', 'lhand')
+      loot.setAttribute('dmg',randomNumber(15, 20))
+      loot.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
+    }
+    else {
+      let randomWeapon = new weapon('weapon', randomNumber(15,20), weaponNames[randomNumber(0,weaponNames.length)])
+      loot = randomWeapon.createWeapon();
+    }
   }
 
   loot.onclick = function () {
@@ -261,7 +287,7 @@ function grabLoot(lootElement, quantity) {
     grabbedLoot.setAttribute('slot',lootElement.getAttribute('slot'))
     grabbedLoot.append(equipBtn)
 
-    //create inventory info 
+    //create stored weapon info 
     atkInfo = document.createElement('li')
     atkInfo.innerHTML = 'Attack: '+grabbedLoot.getAttribute('dmg')
     slotInfo = document.createElement('li')
@@ -276,8 +302,8 @@ function grabLoot(lootElement, quantity) {
   
 
 
-  lootElement.remove() //remove from card
-  document.querySelector(playerPosition).getElementsByClassName('loot')[0].remove() //remove from map monster
+  lootElement.remove() //remove loot from monster card
+  document.querySelector(playerPosition).getElementsByClassName('loot')[0].remove() //remove loot from map & monster
 
   handleInventory()
 }
@@ -295,5 +321,26 @@ function handleInventory() { //sort inventory, stack coins, etc.
 }
 
 function equip(grabbedLoot) {
-  console.log(grabbedLoot)
+  let equipSlot = document.getElementById('equip-'+grabbedLoot.getAttribute('slot'));
+
+  if (equipSlot.classList.contains('equipped')) {
+    status("Can not equip. Please un-equip first.");
+  }
+  else {
+    equipSlot.classList.toggle('equipped')
+    grabbedLoot.getElementsByClassName('equipBtn')[0].innerHTML = 'Equipped'
+    let equipment = document.createElement('img')
+    equipment.src ='1.jpg';
+    equipment.style.height = '30px';
+    equipment.style.width = '30px';
+    equipment.addEventListener('click',function(){unequip(grabbedLoot)})
+    equipSlot.append(equipment)
+  }
+}
+
+function unequip(grabbedLoot){
+  grabbedLoot.getElementsByClassName('equipBtn')[0].innerHTML = 'Equip'
+  let equipSlot = document.getElementById('equip-'+grabbedLoot.getAttribute('slot'));
+  equipSlot.classList.toggle('equipped')
+  equipSlot.innerHTML ='';
 }
