@@ -1,6 +1,6 @@
 var MAP_HEIGHT = 40;
 var MAP_WIDTH = 40;
-var FOE_NUM = 30
+var FOE_NUM = 20
 
 const tileContainer = document.querySelector(".tileContainer");
 
@@ -45,10 +45,15 @@ class Player {
     this.hp = hp;
     this.atk = atk;
   }
+  
 }
 
 //initialize players 👦 
 var player_one = new Player(1, 1, 'player', 100, 10);
+var pouch = document.createElement('li');
+pouch.className= "gold";
+document.querySelector('#inventory').appendChild(pouch);
+handleInventory()
 
 var pPos = document.createElement('div');
 pPos.innerHTML = player_one.name;
@@ -82,7 +87,7 @@ class Monster {
 var monsterNames = ['Mark', 'Ruben', 'James', 'Gerald', 'Emil', 'Jonas', 'Rascal', 'Rakanishu', 'Diablo', 'Enjubi', 'Mads', 'Frederik', 'Jasmin', 'Min', 'Haishengyi', 'Son Goku', 'Gohan', 'Farlig Bamse', 'Gottfred', 'Karl den Store', 'Lars', 'Bob'];
 
 //Loot Class
-
+var weaponNames = ['Sword of Truths', 'Sword of a Thousand Truths', 'Mace', 'Broken Mace','Knife','Dull Knife','Morning Star','Stick','Sharp Stone','Broken Bottle','Wand','Excallibur'];
 var lootBox = []
 // populate world with angry monsters 🐉 and gold 💰 
 var monsterArray = new Monster();
@@ -99,17 +104,23 @@ for (var i = 0; i < FOE_NUM; i++) {
 
   //Make loot for monster
   let loot = document.createElement('BUTTON');
+  loot.className = "loot"
   lootChance = randomNumber(1, 100);
-  if (lootChance > 50) {
-    loot.className = 'loot';
+
+  if (lootChance > 80 && lootChance < 85) {
     loot.setAttribute('quantity', randomNumber(1,30));
     loot.setAttribute('type', 'gold')
     loot.innerHTML = 'Coin 💰';
-  } else {
-    loot.className = 'loot';
+  } else if (lootChance < 26 && lootChance > 25) {
     loot.setAttribute('quantity', 1)
     loot.setAttribute('type', 'trash')
     loot.innerHTML = 'trash';
+  } else
+  {
+    loot.setAttribute('quantity',1)
+    loot.setAttribute('type','weapon')
+    loot.setAttribute('dmg',randomNumber(15, 20))
+    loot.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
   }
 
   loot.onclick = function () {
@@ -223,7 +234,6 @@ function monsterEncounter(monsters) { // takes array of monsters
   
 // looting 
 function grabLoot(lootElement, quantity) {
-  
   let grabbedLoot = document.createElement('li')
   if(lootElement.getAttribute('type') == 'gold'){
     console.log('jubii')
@@ -236,9 +246,21 @@ function grabLoot(lootElement, quantity) {
   if (lootElement.getAttribute('type') == 'trash') {
     grabbedLoot.className = 'trash'
   }
-  grabbedLoot.nodeType
-  grabbedLoot.innerHTML = lootElement.textContent
-  let playerInventory = document.querySelector('#inventory').appendChild(grabbedLoot)
+  if (lootElement.getAttribute('type') == 'weapon') {
+    grabbedLoot.className = 'weapon';
+    grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
+
+    let equipBtn = document.createElement('button');
+    equipBtn.className = 'equipBtn'
+    equipBtn.innerHTML = 'Equip '+grabbedLoot.innerHTML;
+    
+    grabbedLoot.innerHTML = lootElement.textContent
+    grabbedLoot.append(equipBtn)
+    
+    document.querySelector('#inventory').appendChild(grabbedLoot)
+  }
+  equipBtn.addEventListener('click', function() {console.log(grabbedLoot)})
+
 
   lootElement.remove() //remove from card
   document.querySelector(playerPosition).getElementsByClassName('loot')[0].remove() //remove from map monster
@@ -249,38 +271,15 @@ function grabLoot(lootElement, quantity) {
 function handleInventory() { //sort inventory, stack coins, etc.
   let inventory = document.querySelector('#inventory'); //get inventory
   let goldArray = inventory.getElementsByClassName('gold'); // get new gold in inventory
-  
-  let wallet = 0;
+  let weaponArray = Array.from(inventory.getElementsByClassName('weapon'));
+
   if (goldArray.length > 1) {
     goldArray[0].setAttribute('quantity', Math.floor(goldArray[0].getAttribute('quantity')) + Math.floor(goldArray[1].getAttribute('quantity'))) 
     goldArray[1].remove()
     goldArray[0].innerHTML = goldArray[0].getAttribute('quantity') + ' coins'
   }
-  else {
-    console.log('no')
-    let gold
-    walletElement = document.createElement('li');
-    walletElement.className = 'gold'
-    walletElement.innerHTML = wallet
-    inventory.appendChild(walletElement); 
-  }
-  //for (let i = 0; i < goldArray.length; i++) { //sum all money in inventory
-  //  wallet += parseInt(goldArray[i].getAttribute('quantity'));
-  
-//
-  //  
-  //}
-  //inventory.appendChild(walletElement); 
-  //console.log(wallet);
-
-//  function stackStackable(stack){
-//    Array.from(stack).forEach(
-//      function(pc){
-//        console.log(pc.length)      
-//      }
-//    );  
-//  }
-  //stackStackable(goldArray);
-  //goldArray.forEach((coin)=> {console.log('money money monet')});
 }
-//equip
+
+function equip() {
+  console.log('equipping')
+}
