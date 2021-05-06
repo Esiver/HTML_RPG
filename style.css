@@ -82,6 +82,10 @@
   background-color: #2f0000;
   color: white;
 }
+#inventory .armor {
+  background-color: #12002f;
+  color: white;
+}
 
 .player-equipment {
   display: flex;

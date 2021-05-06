@@ -88,9 +88,10 @@ var monsterNames = ['Mark', 'Ruben', 'James', 'Gerald', 'Emil', 'Jonas', 'Rascal
 
 //Loot Class
 var weaponNames = ['Sword of Truths', 'Sword of a Thousand Truths', 'Mace', 'Broken Mace','Knife','Dull Knife','Morning Star','Stick','Sharp Stone','Broken Bottle','Wand','Excallibur'];
+var bodyNamesLow = ['Ragged Shirt', 'T-shirt', 'Tunica', 'Polo']
 
 class weapon { // todo: also create classes for other equipment + trash.
-  constructor(type, dmg, title ) {
+  constructor(type, dmg, title, slot ) {
     this.type = type;
     this.dmg = dmg;
     this.title = title;
@@ -100,12 +101,49 @@ class weapon { // todo: also create classes for other equipment + trash.
   createWeapon() {
     let outputWeapon = document.createElement('BUTTON');
     outputWeapon.className = 'loot';
-    outputWeapon.setAttribute('type','weapon')
-    outputWeapon.setAttribute('slot', 'lhand')
+    outputWeapon.setAttribute('type', this.type)
+    outputWeapon.setAttribute('slot', this.slot)
     outputWeapon.setAttribute('dmg',randomNumber(15, 20))
     outputWeapon.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
     
     return outputWeapon;
+  }
+}
+
+class armor {
+  constructor(type, defence, slot, grade, multip){
+    this.type = type;
+    this.defence = defence;
+    this.slot = slot;
+    this.grade = grade;
+    this.multip = multip;
+  }
+  static quantity = 1;
+  createItem () { //maaske lav flere function for rare items, normal items, etc...
+    let outputItem = document.createElement('BUTTON');
+    outputItem.className = 'loot';
+    outputItem.setAttribute('type', this.type);
+    outputItem.setAttribute('defence', this.multip*this.defence);
+    outputItem.setAttribute('slot', this.slot);
+
+    let prefix = 'Regular';
+    if (this.multip > 1 && this.multip < 2) {
+      prefix = 'Reinforced '
+    } else if (this.multip > 2) {prefix = 'Elite '} // giv item et sejt navn hvis bonus multipel er god.
+    
+    if (this.slot == 'body') {
+      if (this.grade == 'low') {
+        console.log('LLL')
+        outputItem.innerHTML = prefix + bodyNamesLow[randomNumber(0,bodyNamesLow.length)]
+      } else if (this.grade == 'med') {
+        outputItem.innerHTML = prefix + 'nice'
+      }
+    }
+    else if (this.slot == 'legs') {
+      outputItem.innerHTML = 'Jeans'
+    } 
+    else {outputItem.innerHTML='FEJL!'}
+    return outputItem;
   }
 }
 
@@ -145,8 +183,10 @@ for (var i = 0; i < FOE_NUM; i++) {
       loot.innerHTML = weaponNames[randomNumber(0,weaponNames.length)]
     }
     else {
-      let randomWeapon = new weapon('weapon', randomNumber(15,20), weaponNames[randomNumber(0,weaponNames.length)])
-      loot = randomWeapon.createWeapon();
+      let randomWeapon = new weapon('wear', randomNumber(15,20), weaponNames[randomNumber(0,weaponNames.length)],'lhand')
+      let randomBody = new armor('wear', 30, 'body', 'low', 3)
+      //loot = randomWeapon.createWeapon();
+      loot = randomBody.createItem()
     }
   }
 
@@ -273,31 +313,58 @@ function grabLoot(lootElement, quantity) {
   if (lootElement.getAttribute('type') == 'trash') {
     grabbedLoot.className = 'trash'
   }
-  if (lootElement.getAttribute('type') == 'weapon') {
+  if (lootElement.getAttribute('type') =='wear') {
+    if (lootElement.getAttribute('slot') == 'lhand') {
+      grabbedLoot.className = 'weapon';
+      grabbedLoot.setAttribute('grade', lootElement.getAttribute('grade'))
+      grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
 
-    grabbedLoot.className = 'weapon';
-    grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
+
+      let equipBtn = document.createElement('button');
+      equipBtn.className = 'equipBtn';
+      equipBtn.innerHTML = 'Equip ';
+      
+      grabbedLoot.innerHTML = lootElement.textContent
+      grabbedLoot.setAttribute('slot',lootElement.getAttribute('slot'))
+      grabbedLoot.append(equipBtn)
+
+      //create stored weapon info 
+      atkInfo = document.createElement('li')
+      atkInfo.innerHTML = 'Attack: '+grabbedLoot.getAttribute('dmg')
+      slotInfo = document.createElement('li')
+      slotInfo.innerHTML = 'Slot: '+grabbedLoot.getAttribute('slot')
+
+      grabbedLoot.append(atkInfo, slotInfo)
+      
+      document.querySelector('#inventory').appendChild(grabbedLoot)
+
+      equipBtn.addEventListener('click', function() {equip(grabbedLoot)})
+    }
+    if (lootElement.getAttribute('slot')=='body') {
+      grabbedLoot.className = 'armor';
+      grabbedLoot.setAttribute('defence', lootElement.getAttribute('defence'));
 
 
-    let equipBtn = document.createElement('button');
-    equipBtn.className = 'equipBtn';
-    equipBtn.innerHTML = 'Equip ';
-    
-    grabbedLoot.innerHTML = lootElement.textContent
-    grabbedLoot.setAttribute('slot',lootElement.getAttribute('slot'))
-    grabbedLoot.append(equipBtn)
+      let equipBtn = document.createElement('button');
+      equipBtn.className = 'equipBtn';
+      equipBtn.innerHTML = 'Equip ';
+      
+      grabbedLoot.innerHTML = lootElement.textContent
+      grabbedLoot.setAttribute('slot',lootElement.getAttribute('slot'))
+      grabbedLoot.append(equipBtn)
 
-    //create stored weapon info 
-    atkInfo = document.createElement('li')
-    atkInfo.innerHTML = 'Attack: '+grabbedLoot.getAttribute('dmg')
-    slotInfo = document.createElement('li')
-    slotInfo.innerHTML = 'Slot: '+grabbedLoot.getAttribute('slot')
+      //create stored weapon info 
+      atkInfo = document.createElement('li')
+      atkInfo.innerHTML = 'Defence: '+grabbedLoot.getAttribute('defence')
+      slotInfo = document.createElement('li')
+      slotInfo.innerHTML = 'Slot: '+grabbedLoot.getAttribute('slot')
 
-    grabbedLoot.append(atkInfo, slotInfo)
-    
-    document.querySelector('#inventory').appendChild(grabbedLoot)
+      grabbedLoot.append(atkInfo, slotInfo)
+      
+      document.querySelector('#inventory').appendChild(grabbedLoot)
 
-    equipBtn.addEventListener('click', function() {equip(grabbedLoot)})
+      equipBtn.addEventListener('click', function() {equip(grabbedLoot)})
+    }
   }
   
 
@@ -311,7 +378,7 @@ function grabLoot(lootElement, quantity) {
 function handleInventory() { //sort inventory, stack coins, etc.
   let inventory = document.querySelector('#inventory'); //get inventory
   let goldArray = inventory.getElementsByClassName('gold'); // get new gold in inventory
-  let weaponArray = Array.from(inventory.getElementsByClassName('weapon'));
+  //let weaponArray = Array.from(inventory.getElementsByClassName('wear'));
 
   if (goldArray.length > 1) {
     goldArray[0].setAttribute('quantity', Math.floor(goldArray[0].getAttribute('quantity')) + Math.floor(goldArray[1].getAttribute('quantity'))) 
