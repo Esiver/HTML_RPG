@@ -63,9 +63,17 @@
   display: flex;
   justify-content: space-around;
 }
+.throwBtn {
+  position: relative;
+  margin-top: -3rem;
+}
 
 .loot {
   display: none;
+}
+#inventory {
+  max-height: 300px;
+  overflow-y: scroll;
 }
 #inventory li {
   border: 1px solid black;
