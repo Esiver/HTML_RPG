@@ -4,13 +4,16 @@ var FOE_NUM = 20
 
 var PLAYER_HP = 100;
 var PLAYER_ATK = 10;
-var PLAYER_DEF = 0;
+var PLAYER_DEF = 5;
 
 const tileContainer = document.querySelector(".tileContainer");
 
 // for x axis
 for (w = 0; w < MAP_WIDTH; w++) {
   var row = document.createElement("li");
+  while ( (w+'').length < 3) {
+    w = "0"+w
+  }
   var rowId = "row-" + w;
   row.className = "tile";
   row.setAttribute("id", rowId);
@@ -20,6 +23,9 @@ for (w = 0; w < MAP_WIDTH; w++) {
   // for y axis
   for (h = 0; h < MAP_HEIGHT; h++) {
     var col = document.createElement("li");
+    while( (h+'').length< 3) {
+      h = "0"+h
+    }
     var colId = "row-" + w + "_col-" + h;
     col.className = "tile";
 
@@ -43,8 +49,8 @@ function status(message) {
 // Classes
 class Player {
   constructor(pos_x, pos_y, name, hp, atk, def) {
-    this.pos_x = pos_x;
-    this.pos_y = pos_y;
+    this.pos_x = pos_x//('000' + pos_x).substr(-3)
+    this.pos_y = pos_y//('000' + pos_y).substr(-3)
     this.name = name;
     this.hp = hp;
     this.atk = atk;
@@ -54,7 +60,7 @@ class Player {
 }
 
 //initialize players 👦 
-var player_one = new Player(0, 0, 'player', PLAYER_HP, PLAYER_ATK, PLAYER_DEF);
+var player_one = new Player('001', '001', 'player', PLAYER_HP, PLAYER_ATK, PLAYER_DEF);
 var pouch = document.createElement('li');
 pouch.className = "gold";
 document.querySelector('#inventory').appendChild(pouch);
@@ -82,13 +88,14 @@ const monsterAtPosition = () => {
 class Monster {
   constructor(alive, pos_x, pos_y, name, hp, atk) {
     this.alive = alive;
-    this.pos_x = pos_x;
-    this.pos_y = pos_y;
+    this.pos_x = ('000' + pos_x).substr(-3)
+
+    this.pos_y = ('000' + pos_y).substr(-3)
+
     this.name = name;
     this.hp = hp;
     this.atk = atk;
   }
-
 }
 
 //Monster names
@@ -167,6 +174,8 @@ for (var i = 0; i < FOE_NUM; i++) {
   populateMonster.setAttribute('hp', monsterArray[i].hp);
   populateMonster.setAttribute('atk', monsterArray[i].atk);
 
+  populateMonster.addEventListener('click', function(){moveUnit(populateMonster, 5, 5)})
+  console.log(monsterArray[i].pos_x)
   document.querySelector('#row-' + monsterArray[i].pos_x + '_col-' + monsterArray[i].pos_y).appendChild(populateMonster);
 
   //Make loot for monster
@@ -200,10 +209,84 @@ for (var i = 0; i < FOE_NUM; i++) {
   populateMonster.appendChild(loot);
 }
 
+function moveUnit(unit, a,b) {
+  delayedMovementIteration(0, unit, randomNumber(-5,-1), randomNumber(1,2));
+}
+
+function delayedMovementIteration(index, unit, vx, vy) {
+  if (index == 0) {
+    // distance, rounding upwards for fun. otherwise Math.round
+    dist = Math.ceil(Math.sqrt((vx*vx)+(vy*vy)))
+    console.log('d = ', dist)
+  }
+  if (index >= dist) {
+    return;
+  }
+
+  //starting position
+  pos0 = unit.parentNode.getAttribute('id')
+
+  console.log('vectors', vx, vy)
+  // make number from three digits
+  x0 = Number(pos0.charAt(4) +pos0.charAt(5) +pos0.charAt(6));
+  y0 = Number(pos0.charAt(12)+pos0.charAt(13)+pos0.charAt(14));
+
+  console.log('pos0',x0, y0)
+
+  if (vy > 0) {
+    y1= y0 +1
+    vy= vy -1
+  }
+  else if (vy < 0) {
+    y1 = y0 - 1
+    vy = vy+1
+  }
+  if (vx > 0) {
+    x1 = x0 + 1
+    vx = vx -1
+  }
+  else if (vx < 0 ) {
+    x1 = x0 -1
+    vx = vx +1
+  }
+  
+
+  // // make three-digit number
+  if (x1 < 0) {
+    x1 = 0
+  }
+  if (y1 < 0) {
+    y1 = 0
+  }
+   x1 = ('000' + (x1)).substr(-3); 
+   y1 = ('000' + (y1)).substr(-3);
+
+  // next_x = ('000' + (Number(x0) + Number(x1))).substr(-3)
+  // next_y = ('000' + (Number(y0) + Number(y1))).substr(-3)
+  
+  pos1 = 'row-' + x1 + '_col-' + y1;
+  console.log('pos1',pos1)
+  document.querySelector('#'+pos1).append(unit)
+
+  console.log(index)
+  index += 1;
+  
+
+  // pos0 = pos1
+  move(0,0)
+  setTimeout(delayedMovementIteration.bind({}, index, unit, vx ,vy), 50);
+}
+
+
+
 // key presses & control
 function move(x, y) {
-  player_one.pos_x = player_one.pos_x + x; //increment coordinates
-  player_one.pos_y = player_one.pos_y + y;
+  // ('000' + pos_y).substr(-3)
+  x = Number(x)
+
+  player_one.pos_x = (('000' + (Number(player_one.pos_x) + x)).substr(-3)); //increment coordinates
+  player_one.pos_y = (('000' + (Number(player_one.pos_y) + y)).substr(-3));
+
   document.querySelector('#row-' + player_one.pos_x + '_col-' + player_one.pos_y).appendChild(pPos); //append player to new tile
   playerPosition = '#row-' + player_one.pos_x + '_col-' + player_one.pos_y;
 
@@ -242,31 +325,28 @@ function check() {
   if (monsterAtPosition().length > 0) { // if monster array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(monsterAtPosition())
   }
-  
+}
+
+function checkStats () {
   document.getElementById('player_atk').innerHTML = pPos.getAttribute('atk');
   document.getElementById('player_def').innerHTML = pPos.getAttribute('def');
+  document.getElementById('player_hp').innerHTML = pPos.getAttribute('hp');
 }
 
 function atkBtn(opponent) {
   clearEncounters(); //clear old instances of monsters
 
-  handleDmg(player_one.name, opponent, player_one.atk, 'normal')
-  //opponent.hp - player_one.atk//get monster HP
-  //apply damage
-  //counterAttack
-  handleCombat(monsterAtPosition(), pPos); //monsters retaliate and counter-attacks the player! oh no!
+  handleDmg(player_one.name, opponent, player_one.atk, 'normal') // Attack chosen monster
+  handleCombat(monsterAtPosition(), pPos); //ALL monsters retaliate and counter-attacks the player! oh no!
 
   check(); //get new instances of monsters
 }
 
 function handleCombat( monsters, player) {
-  console.log('---')
   monsters.forEach((monster) => {
-    // monster attacks
-    console.log(monster);
-    console.log(player)
-    handleDmg(monster, player, 10, 'normal')
+    handleDmg(monster, player, monster.getAttribute('atk'), 'normal') // each monster retaliates
   })
+  checkStats();
 }
 
 function handleDmg(giver, receiver, amount, type) {
@@ -323,8 +403,6 @@ function monsterEncounter(monsters) { // takes array of monsters
 function grabLoot(lootElement, quantity) {
   let grabbedLoot = document.createElement('li')
 
-
-
   if (lootElement.getAttribute('type') == 'gold') {
     console.log('jubii')
     grabbedLoot.className = 'gold'
@@ -350,8 +428,6 @@ function grabLoot(lootElement, quantity) {
       grabbedLoot.innerHTML = lootElement.textContent
       grabbedLoot.setAttribute('slot', lootElement.getAttribute('slot'))
       grabbedLoot.append(equipBtn)
-
-
 
       //create stored weapon info 
       atkInfo = document.createElement('li')
@@ -451,11 +527,13 @@ function equip(grabbedLoot) {
 
     if (grabbedLoot.className == 'weapon') {
       player_one.atk = grabbedLoot.getAttribute('dmg');
+      pPos.setAttribute('atk', grabbedLoot.getAttribute('atk'));
     } else if (grabbedLoot.className == 'armor') {
+      pPos.setAttribute('def', grabbedLoot.getAttribute('def')) 
       player_one.def = grabbedLoot.getAttribute('def')
     }
   }
-  check();
+  checkStats();
 }
 
 function unequip(grabbedLoot) {
@@ -471,9 +549,10 @@ function unequip(grabbedLoot) {
     player_one.def = PLAYER_DEF;
   }
 
-  check();
+  checkStats();
 }
 
 
 // Start Game
 check();
+checkStats();
