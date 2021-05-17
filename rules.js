@@ -174,7 +174,7 @@ for (var i = 0; i < FOE_NUM; i++) {
   populateMonster.setAttribute('hp', monsterArray[i].hp);
   populateMonster.setAttribute('atk', monsterArray[i].atk);
 
-  populateMonster.addEventListener('click', function(){moveUnit(populateMonster, 5, 5)})
+  populateMonster.addEventListener('click', function(){moveUnitPosition(0,populateMonster, 20, 20)})
   console.log(monsterArray[i].pos_x)
   document.querySelector('#row-' + monsterArray[i].pos_x + '_col-' + monsterArray[i].pos_y).appendChild(populateMonster);
 
@@ -209,38 +209,74 @@ for (var i = 0; i < FOE_NUM; i++) {
   populateMonster.appendChild(loot);
 }
 
-function moveUnit(unit, a,b) {
-  delayedMovementIteration(0, unit, randomNumber(-5,-1), randomNumber(1,2));
+function moveUnitPosition(index, unit, x1, y1){
+
+  pos0 = unit.parentNode.getAttribute('id')
+  x0 = Number(pos0.charAt(4) +pos0.charAt(5) +pos0.charAt(6));
+  y0 = Number(pos0.charAt(12)+pos0.charAt(13) +pos0.charAt(14));
+
+  if (index == 0) {
+    // distance, rounding upwards for fun. otherwise Math.round
+    dist = Math.round(Math.sqrt(((x1-x0)*(x1-x0))+((y1-y0)*(y1-y0))))
+  }
+  
+  if (index >= dist+1) {
+    return true;
+  }
+
+  //simple linear movement logic
+  if (x0 < x1) { 
+    vx = x0 + 1;
+  } else if ( x0 > x1) {
+      vx = x0 -1
+    } else {vx=x0}
+  if (y0 < y1) {
+    vy = y0 + 1;
+  } else if ( y0 > y1) {
+    vy = y0 -1
+  } else {vy=y0}
+
+  vx = ('000' + (vx)).substr(-3); 
+  vy = ('000' + (vy)).substr(-3);
+
+  // formulate string for position id and append.
+  pos1 = 'row-' + vx + '_col-' + vy;
+
+  document.querySelector('#'+pos1).append(unit)  
+
+  index += 1;
+
+  move(0,0)
+  setTimeout(moveUnitPosition.bind({}, index, unit, x1 ,y1), 550);
 }
 
-function delayedMovementIteration(index, unit, vx, vy) {
+function moveUnitDistance(index, unit, vx, vy) {
+  
   if (index == 0) {
     // distance, rounding upwards for fun. otherwise Math.round
     dist = Math.ceil(Math.sqrt((vx*vx)+(vy*vy)))
-    console.log('d = ', dist)
+    y1 = y0
   }
   if (index >= dist) {
-    return;
+    return true;
   }
-
+  console.log('delayed movement func')
   //starting position
   pos0 = unit.parentNode.getAttribute('id')
 
-  console.log('vectors', vx, vy)
   // make number from three digits
   x0 = Number(pos0.charAt(4) +pos0.charAt(5) +pos0.charAt(6));
-  y0 = Number(pos0.charAt(12)+pos0.charAt(13)+pos0.charAt(14));
+  y0 = Number(pos0.charAt(12)+pos0.charAt(13) +pos0.charAt(14));
 
-  console.log('pos0',x0, y0)
-
+  // logic for direction vector. If positive number, move in positive numbers and decrease vector...
   if (vy > 0) {
     y1= y0 +1
     vy= vy -1
-  }
-  else if (vy < 0) {
+  } 
+  else if (vy < 0) { // and if negative number, move in negativesm and reduce vector with positive number. 
     y1 = y0 - 1
     vy = vy+1
-  }
+  } 
   if (vx > 0) {
     x1 = x0 + 1
     vx = vx -1
@@ -248,33 +284,29 @@ function delayedMovementIteration(index, unit, vx, vy) {
   else if (vx < 0 ) {
     x1 = x0 -1
     vx = vx +1
-  }
+  } 
   
-
-  // // make three-digit number
-  if (x1 < 0) {
+  
+  // make sure we're not out of bounds on the map.
+  if (x1 < 0 ) {
     x1 = 0
-  }
+  } else if (x1 > MAP_WIDTH) { x1 = MAP_WIDTH }
   if (y1 < 0) {
     y1 = 0
-  }
-   x1 = ('000' + (x1)).substr(-3); 
-   y1 = ('000' + (y1)).substr(-3);
+  } else if (y1 > MAP_HEIGHT) { y1 = MAP_HEIGHT}
 
-  // next_x = ('000' + (Number(x0) + Number(x1))).substr(-3)
-  // next_y = ('000' + (Number(y0) + Number(y1))).substr(-3)
-  
+  // Make coordinates into 3-digit map coordinates.
+  x1 = ('000' + (x1)).substr(-3); 
+  y1 = ('000' + (y1)).substr(-3);
+
+  // formulate string for position id and append.
   pos1 = 'row-' + x1 + '_col-' + y1;
-  console.log('pos1',pos1)
-  document.querySelector('#'+pos1).append(unit)
+  document.querySelector('#'+pos1).append(unit)  
 
-  console.log(index)
   index += 1;
-  
 
-  // pos0 = pos1
   move(0,0)
-  setTimeout(delayedMovementIteration.bind({}, index, unit, vx ,vy), 50);
+  setTimeout(moveUnitDistance.bind({}, index, unit, vx ,vy), 150);
 }
 
 
