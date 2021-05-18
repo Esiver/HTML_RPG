@@ -38,7 +38,24 @@
   height: var(--tile-height);
   width: var(--tile-width);
 }
-
+.city {
+  background-color: rgb(0, 24, 70);
+  border:1px solid white;
+  color: white;
+  position: absolute;
+  height: calc(var(--tile-height)*2);
+  width: calc(var(--tile-width)*2);
+}
+.city ~ div{
+  font-size: 0px;
+}
+.merchant{
+  background-color: green;
+  color: white;
+  position: absolute;
+  height: var(--tile-height);
+  width: var(--tile-width);
+}
 .monster {
   background-color: yellow;
   height: var(--tile-height);

@@ -11,20 +11,19 @@ const tileContainer = document.querySelector(".tileContainer");
 // for x axis
 for (w = 0; w < MAP_WIDTH; w++) {
   var row = document.createElement("li");
-  while ( (w+'').length < 3) {
-    w = "0"+w
+  while ((w + '').length < 3) {
+    w = "0" + w
   }
   var rowId = "row-" + w;
   row.className = "tile";
   row.setAttribute("id", rowId);
-
   tileContainer.append(row);
 
   // for y axis
   for (h = 0; h < MAP_HEIGHT; h++) {
     var col = document.createElement("li");
-    while( (h+'').length< 3) {
-      h = "0"+h
+    while ((h + '').length < 3) {
+      h = "0" + h
     }
     var colId = "row-" + w + "_col-" + h;
     col.className = "tile";
@@ -49,8 +48,8 @@ function status(message) {
 // Classes
 class Player {
   constructor(pos_x, pos_y, name, hp, atk, def) {
-    this.pos_x = pos_x//('000' + pos_x).substr(-3)
-    this.pos_y = pos_y//('000' + pos_y).substr(-3)
+    this.pos_x = pos_x //('000' + pos_x).substr(-3)
+    this.pos_y = pos_y //('000' + pos_y).substr(-3)
     this.name = name;
     this.hp = hp;
     this.atk = atk;
@@ -76,9 +75,9 @@ pPos.setAttribute('def', player_one.def)
 // initialize player by appending a div
 document.querySelector('#row-' + player_one.pos_x + '_col-' + player_one.pos_y).appendChild(pPos);
 var playerPosition = '#row-' + player_one.pos_x + '_col-' + player_one.pos_y;
-// cards at position 
-const cardAtPosition = () => {
-  return playerPosition + '-card'
+// cards at player position 
+const cardAtPosition = (position) => {
+  return position + '-card'
 } //get card id
 const monsterAtPosition = () => {
   return Array.from(document.querySelector(playerPosition).getElementsByClassName('monster'))
@@ -98,19 +97,98 @@ class Monster {
   }
 }
 
+//cities
+var cities = [
+  {
+    "pos": [7,7],
+    "name":"Dogos",
+    "population": 1521,
+    "owner": "Robert",
+    "wealth": 5000,
+    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+  },
+  {
+    "pos": [30,7],
+    "name":"Fargarth",
+    "population": 421,
+    "owner": "Bob",
+    "wealth": 12000,
+    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+  },
+  {
+    "pos": [20,17],
+    "name":"Helbreth",
+    "population": 2321,
+    "owner": "Bob",
+    "wealth": 1000,
+    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+  },
+  {
+    "pos": [08,37],
+    "name":"Bootboot",
+    "population": 5321,
+    "owner": "Diablo",
+    "wealth": 1000,
+    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+  }
+]
+//make cities
+for(c=0 ; c< cities.length ; c++){
+  x = cities[c].pos[0]; 
+  y = cities[c].pos[1];
+  x_cord = ('000' + (x)).substr(-3);
+  y_cord = ('000' + (y)).substr(-3);
+  var city = document.createElement('div');
+  city.setAttribute('owner',cities[c].owner)
+  city.setAttribute('population', cities[c].population)
+  city.innerHTML = cities[c].name
+  city.className ='city'
+  document.querySelector('#row-'+x_cord+'_col-'+y_cord).append(city)
+}
+//NPC class
+class merchant {
+  constructor(wealth, name, prof, x, y) {
+        this.wealth = wealth
+        this.name = name
+        this.prof = prof
+        this.x = x
+        this.y = y
+  }
+  createMerchant(){
+    let m = document.createElement('div')
+    m.innerHTML = this.name
+    m.setAttribute('wealth', this.wealth)
+    m.setAttribute('prof', this.prof)
+    m.className = 'merchant'
+    return m
+  }
+}
+var MerchantNPC = new merchant(500, 'Confucius', 'Smith', 30,30)
+let Confucius = MerchantNPC.createMerchant()
+document.querySelector('#row-030_col-030').append(Confucius)
+// NPC behaviour
+
 //Monster names
 var monsterNames = ['Mark', 'Ruben', 'James', 'Gerald', 'Emil', 'Jonas', 'Rascal', 'Rakanishu', 'Diablo', 'Enjubi', 'Mads', 'Frederik', 'Jasmin', 'Min', 'Haishengyi', 'Son Goku', 'Gohan', 'Farlig Bamse', 'Gottfred', 'Karl den Store', 'Lars', 'Bob'];
+
+
+//Loot Quality Roll
+function QualityRoll() {
+  return 'low'
+}
 
 //Loot Class
 var weaponNames = ['Sword of Truths', 'Sword of a Thousand Truths', 'Mace', 'Broken Mace', 'Knife', 'Dull Knife', 'Morning Star', 'Stick', 'Sharp Stone', 'Broken Bottle', 'Wand', 'Excallibur'];
 var bodyNamesLow = ['Ragged Shirt', 'T-shirt', 'Tunica', 'Polo']
 
 class weapon { // todo: also create classes for other equipment + trash.
+  
   constructor(type, dmg, title, slot) {
     this.type = type;
     this.dmg = dmg;
     this.title = title;
     this.slot = slot;
+    this.grade = QualityRoll();
   }
   static quantity = 1;
   createWeapon() {
@@ -119,6 +197,7 @@ class weapon { // todo: also create classes for other equipment + trash.
     outputWeapon.setAttribute('type', this.type)
     outputWeapon.setAttribute('slot', this.slot)
     outputWeapon.setAttribute('dmg', randomNumber(15, 20))
+    outputWeapon.setAttribute('grade', this.grade)
     outputWeapon.innerHTML = weaponNames[randomNumber(0, weaponNames.length)]
 
     return outputWeapon;
@@ -130,7 +209,7 @@ class armor {
     this.type = type;
     this.def = def;
     this.slot = slot;
-    this.grade = grade;
+    this.grade = QualityRoll();
     this.multip = multip;
   }
   static quantity = 1;
@@ -140,7 +219,7 @@ class armor {
     outputItem.setAttribute('type', this.type);
     outputItem.setAttribute('def', this.multip * this.def);
     outputItem.setAttribute('slot', this.slot);
-
+    outputItem.setAttribute('grade', this.grade)
     let prefix = 'Regular';
     if (this.multip > 1 && this.multip < 2) {
       prefix = 'Reinforced '
@@ -174,8 +253,9 @@ for (var i = 0; i < FOE_NUM; i++) {
   populateMonster.setAttribute('hp', monsterArray[i].hp);
   populateMonster.setAttribute('atk', monsterArray[i].atk);
 
-  populateMonster.addEventListener('click', function(){moveUnitPosition(0,populateMonster, 20, 20)})
-  console.log(monsterArray[i].pos_x)
+  populateMonster.addEventListener('click', function () {
+    moveUnitPosition(0, populateMonster, 20, 5)
+  })
   document.querySelector('#row-' + monsterArray[i].pos_x + '_col-' + monsterArray[i].pos_y).appendChild(populateMonster);
 
   //Make loot for monster
@@ -192,6 +272,7 @@ for (var i = 0; i < FOE_NUM; i++) {
     loot.setAttribute('type', 'trash')
     loot.innerHTML = 'trash';
   } else if (lootChance < 97.33) {
+    
     loot.setAttribute('quantity', 1)
     let subChance = randomNumber(1, 100);
     if (subChance > 50) {
@@ -209,104 +290,108 @@ for (var i = 0; i < FOE_NUM; i++) {
   populateMonster.appendChild(loot);
 }
 
-function moveUnitPosition(index, unit, x1, y1){
-
+function moveUnitPosition(index, unit, x1, y1) {
   pos0 = unit.parentNode.getAttribute('id')
-  x0 = Number(pos0.charAt(4) +pos0.charAt(5) +pos0.charAt(6));
-  y0 = Number(pos0.charAt(12)+pos0.charAt(13) +pos0.charAt(14));
+  x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
+  y0 = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
 
   if (index == 0) {
     // distance, rounding upwards for fun. otherwise Math.round
-    dist = Math.round(Math.sqrt(((x1-x0)*(x1-x0))+((y1-y0)*(y1-y0))))
+    dist = Math.round(Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0))))
   }
-  
-  if (index >= dist+1) {
+
+  if (index >= dist + 1) {
     return true;
   }
 
   //simple linear movement logic
-  if (x0 < x1) { 
-    vx = x0 + 1;
-  } else if ( x0 > x1) {
-      vx = x0 -1
-    } else {vx=x0}
+  if (x0 < x1) { // if current x is smaller than goal x
+    vx = x0 + 1; // increment x by speed 1
+  } else if (x0 > x1) { // else if we're more right on the x-axis, 
+    vx = x0 - 1 // increment position by speed -1
+  } else {
+    vx = x0;
+  } // else we just put our self at endpoint 
+
   if (y0 < y1) {
     vy = y0 + 1;
-  } else if ( y0 > y1) {
-    vy = y0 -1
-  } else {vy=y0}
+  } else if (y0 > y1) {
+    vy = y0 - 1
+  } else {
+    vy = y0
+  }
 
-  vx = ('000' + (vx)).substr(-3); 
+  vx = ('000' + (vx)).substr(-3);
   vy = ('000' + (vy)).substr(-3);
 
   // formulate string for position id and append.
   pos1 = 'row-' + vx + '_col-' + vy;
 
-  document.querySelector('#'+pos1).append(unit)  
+  document.querySelector('#' + pos1).append(unit)
 
   index += 1;
 
-  move(0,0)
-  setTimeout(moveUnitPosition.bind({}, index, unit, x1 ,y1), 550);
+  move(0, 0)
+  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1), 150);
 }
 
 function moveUnitDistance(index, unit, vx, vy) {
-  
+
   if (index == 0) {
     // distance, rounding upwards for fun. otherwise Math.round
-    dist = Math.ceil(Math.sqrt((vx*vx)+(vy*vy)))
+    dist = Math.ceil(Math.sqrt((vx * vx) + (vy * vy)))
     y1 = y0
   }
   if (index >= dist) {
     return true;
   }
-  console.log('delayed movement func')
   //starting position
   pos0 = unit.parentNode.getAttribute('id')
 
   // make number from three digits
-  x0 = Number(pos0.charAt(4) +pos0.charAt(5) +pos0.charAt(6));
-  y0 = Number(pos0.charAt(12)+pos0.charAt(13) +pos0.charAt(14));
+  x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
+  y0 = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
 
   // logic for direction vector. If positive number, move in positive numbers and decrease vector...
   if (vy > 0) {
-    y1= y0 +1
-    vy= vy -1
-  } 
-  else if (vy < 0) { // and if negative number, move in negativesm and reduce vector with positive number. 
+    y1 = y0 + 1
+    vy = vy - 1
+  } else if (vy < 0) { // and if negative number, move in negativesm and reduce vector with positive number. 
     y1 = y0 - 1
-    vy = vy+1
-  } 
+    vy = vy + 1
+  }
   if (vx > 0) {
     x1 = x0 + 1
-    vx = vx -1
+    vx = vx - 1
+  } else if (vx < 0) {
+    x1 = x0 - 1
+    vx = vx + 1
   }
-  else if (vx < 0 ) {
-    x1 = x0 -1
-    vx = vx +1
-  } 
-  
-  
+
   // make sure we're not out of bounds on the map.
-  if (x1 < 0 ) {
+  if (x1 < 0) {
     x1 = 0
-  } else if (x1 > MAP_WIDTH) { x1 = MAP_WIDTH }
+  } else if (x1 > MAP_WIDTH) {
+    x1 = MAP_WIDTH
+  }
   if (y1 < 0) {
     y1 = 0
-  } else if (y1 > MAP_HEIGHT) { y1 = MAP_HEIGHT}
+  } else if (y1 > MAP_HEIGHT) {
+    y1 = MAP_HEIGHT
+  }
 
   // Make coordinates into 3-digit map coordinates.
-  x1 = ('000' + (x1)).substr(-3); 
+  x1 = ('000' + (x1)).substr(-3);
   y1 = ('000' + (y1)).substr(-3);
 
   // formulate string for position id and append.
   pos1 = 'row-' + x1 + '_col-' + y1;
-  document.querySelector('#'+pos1).append(unit)  
+  document.querySelector('#' + pos1).append(unit)
 
   index += 1;
 
-  move(0,0)
-  setTimeout(moveUnitDistance.bind({}, index, unit, vx ,vy), 150);
+  move(0, 0)
+  setTimeout(moveUnitDistance.bind({}, index, unit, vx, vy), 150);
 }
 
 
@@ -359,7 +444,7 @@ function check() {
   }
 }
 
-function checkStats () {
+function checkStats() {
   document.getElementById('player_atk').innerHTML = pPos.getAttribute('atk');
   document.getElementById('player_def').innerHTML = pPos.getAttribute('def');
   document.getElementById('player_hp').innerHTML = pPos.getAttribute('hp');
@@ -374,7 +459,7 @@ function atkBtn(opponent) {
   check(); //get new instances of monsters
 }
 
-function handleCombat( monsters, player) {
+function handleCombat(monsters, player) {
   monsters.forEach((monster) => {
     handleDmg(monster, player, monster.getAttribute('atk'), 'normal') // each monster retaliates
   })
@@ -382,7 +467,7 @@ function handleCombat( monsters, player) {
 }
 
 function handleDmg(giver, receiver, amount, type) {
-  receiver.setAttribute("hp", Math.floor(receiver.getAttribute("hp") - amount ));
+  receiver.setAttribute("hp", Math.floor(receiver.getAttribute("hp") - amount*5));
   status(giver + ' attacks ' + receiver.innerHTML + ' for ' + amount + ' ' + type + ' damage.')
 }
 
@@ -448,9 +533,7 @@ function grabLoot(lootElement, quantity) {
   }
   if (lootElement.getAttribute('type') == 'wear') {
     if (lootElement.getAttribute('slot') == 'lhand') {
-      grabbedLoot.className = 'weapon';
-      grabbedLoot.setAttribute('grade', lootElement.getAttribute('grade'))
-      grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
+
 
 
       let equipBtn = document.createElement('button');
@@ -460,6 +543,9 @@ function grabLoot(lootElement, quantity) {
       grabbedLoot.innerHTML = lootElement.textContent
       grabbedLoot.setAttribute('slot', lootElement.getAttribute('slot'))
       grabbedLoot.append(equipBtn)
+      grabbedLoot.className = 'weapon';
+      grabbedLoot.setAttribute('grade', lootElement.getAttribute('grade'))
+      grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
 
       //create stored weapon info 
       atkInfo = document.createElement('li')
@@ -556,12 +642,12 @@ function equip(grabbedLoot) {
       unequip(grabbedLoot)
     })
     equipSlot.append(equipment)
-
+    status('Equipped '+grabbedLoot.className+" '"+grabbedLoot.firstChild.wholeText+"' for ")
     if (grabbedLoot.className == 'weapon') {
       player_one.atk = grabbedLoot.getAttribute('dmg');
-      pPos.setAttribute('atk', grabbedLoot.getAttribute('atk'));
+      pPos.setAttribute('atk', grabbedLoot.getAttribute('dmg'));
     } else if (grabbedLoot.className == 'armor') {
-      pPos.setAttribute('def', grabbedLoot.getAttribute('def')) 
+      pPos.setAttribute('def', grabbedLoot.getAttribute('def'))
       player_one.def = grabbedLoot.getAttribute('def')
     }
   }
@@ -576,9 +662,11 @@ function unequip(grabbedLoot) {
 
   if (grabbedLoot.className = 'weapon') {
     player_one.atk = PLAYER_ATK;
+    pPos.setAttribute('atk', PLAYER_ATK)
   }
   if (grabbedLoot.className = 'armor') {
     player_one.def = PLAYER_DEF;
+    pPos.setAttribute('def', PLAYER_DEF)
   }
 
   checkStats();
@@ -588,3 +676,6 @@ function unequip(grabbedLoot) {
 // Start Game
 check();
 checkStats();
+
+let 
+moveUnitPosition(0,Confucius,cities[1].pos[0],cities[1].pos[1])
