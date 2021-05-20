@@ -677,5 +677,8 @@ function unequip(grabbedLoot) {
 check();
 checkStats();
 
-let 
-moveUnitPosition(0,Confucius,cities[1].pos[0],cities[1].pos[1])
+// GET DEM MERCHANTS MOVIN
+allMerchants = Array.from(document.getElementsByClassName('merchant'));
+for (m=0 ; m < allMerchants.length ; m++) {
+  moveUnitPosition(0,Confucius,cities[1].pos[0],cities[1].pos[1])
+}
