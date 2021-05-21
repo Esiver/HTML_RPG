@@ -95,6 +95,7 @@ class Monster {
     this.hp = hp;
     this.atk = atk;
   }
+
 }
 
 //cities
@@ -289,8 +290,10 @@ for (var i = 0; i < FOE_NUM; i++) {
   }
   populateMonster.appendChild(loot);
 }
-
-function moveUnitPosition(index, unit, x1, y1) {
+function andThen(b){
+  console.log('completed',b)
+}
+function moveUnitPosition(index, unit, x1, y1, andThen, b ) {
   pos0 = unit.parentNode.getAttribute('id')
   x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
   y0 = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
@@ -301,6 +304,7 @@ function moveUnitPosition(index, unit, x1, y1) {
   }
 
   if (index >= dist + 1) {
+    try{ andThen(b)} catch(err){console.log('error',b)}
     return true;
   }
 
@@ -676,9 +680,29 @@ function unequip(grabbedLoot) {
 // Start Game
 check();
 checkStats();
+let Game = true;
 
 // GET DEM MERCHANTS MOVIN
 allMerchants = Array.from(document.getElementsByClassName('merchant'));
 for (m=0 ; m < allMerchants.length ; m++) {
-  moveUnitPosition(0,Confucius,cities[1].pos[0],cities[1].pos[1])
+  
 }
+
+function merchantMove(){
+
+}
+
+let merchantMovePromise = new Promise((resolve, reject) => {
+  let a = 1 + 1
+  if (moveUnitPosition(0,Confucius,cities[1].pos[0],cities[1].pos[1], andThen, 'lol')) {
+    resolve('jugu')
+  } else {
+    reject('damn')
+  }
+})
+
+merchantMovePromise.then((message)=>{
+  console.log('then',message)
+}).catch((message)=>{
+  merchantMove()
+})
