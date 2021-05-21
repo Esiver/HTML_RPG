@@ -142,32 +142,82 @@ for(c=0 ; c< cities.length ; c++){
   var city = document.createElement('div');
   city.setAttribute('owner',cities[c].owner)
   city.setAttribute('population', cities[c].population)
+  city.setAttribute('wealth', cities[c].wealth)
   city.innerHTML = cities[c].name
   city.className ='city'
   document.querySelector('#row-'+x_cord+'_col-'+y_cord).append(city)
 }
-//NPC class
+
+//inventory
+
+
+
+//NPC:merchant class
 class merchant {
-  constructor(wealth, name, prof, x, y) {
+  constructor(wealth, name, trade, x, y) {
         this.wealth = wealth
         this.name = name
-        this.prof = prof
+        this.trade = trade
         this.x = x
         this.y = y
+  }
+
+  //rolll inventory
+  rollInventory(){
+    let howMany = randomNumber(1,10);
+    let items = []  
+    for (i=0; i<howMany; i++) { 
+      console.log(this.trade)
+      items[i] = document.createElement('p')
+      items[i].innerHTML = this.trade
+      console.log(items[i])
+    }
+    
+    return items
   }
   createMerchant(){
     let m = document.createElement('div')
     m.innerHTML = this.name
     m.setAttribute('wealth', this.wealth)
-    m.setAttribute('prof', this.prof)
+    m.setAttribute('trade', this.trade)
     m.className = 'merchant'
+
     return m
   }
 }
-var MerchantNPC = new merchant(500, 'Confucius', 'Smith', 30,30)
-let Confucius = MerchantNPC.createMerchant()
+var SmithNPC = new merchant(500, 'Confucius', 'Stone', 30,30)
+let Confucius = SmithNPC.createMerchant()
+
+
+var WoolNPC = new merchant(500, 'Adam Smith', 'Fur', 20,20)
+let Adam = WoolNPC.createMerchant()
+Adam.append(...WoolNPC.rollInventory())
+
 document.querySelector('#row-030_col-030').append(Confucius)
-// NPC behaviour
+document.querySelector('#row-030_col-030').append(Adam)
+
+
+//merhchant behavior
+function merchantBehavior(merchant){
+  let arrivedLocation = merchant.parentNode.firstChild // city DOM object, hopefully its the first object :D
+  //if we arrive at city
+  if (arrivedLocation.getAttribute('class') == 'city' ){
+    //console.log(cities.name[arrivedLocation.firstChild])
+    console.log(merchant.getAttribute('trade'))
+    let fur_value = 30;
+
+    
+
+  }
+  //let obj = cities.find(obj => obj.name == "Bootboot"); FINDS CITY WITH NAME
+}
+// Do something for every merchant
+allMerchants = Array.from(document.getElementsByClassName('merchant'));
+for (m=0 ; m < allMerchants.length ; m++) {
+  r = randomNumber(0, 4)
+  moveUnitPosition(0,allMerchants[m],cities[r].pos[0], cities[r].pos[1], true)
+}
+
 
 //Monster names
 var monsterNames = ['Mark', 'Ruben', 'James', 'Gerald', 'Emil', 'Jonas', 'Rascal', 'Rakanishu', 'Diablo', 'Enjubi', 'Mads', 'Frederik', 'Jasmin', 'Min', 'Haishengyi', 'Son Goku', 'Gohan', 'Farlig Bamse', 'Gottfred', 'Karl den Store', 'Lars', 'Bob'];
@@ -290,10 +340,18 @@ for (var i = 0; i < FOE_NUM; i++) {
   }
   populateMonster.appendChild(loot);
 }
-function andThen(b){
-  console.log('completed',b)
+
+function behavior(unit) {
+  //if merchant
+  if (unit.getAttribute('class') == 'merchant'){
+    merchantBehavior(unit)
+  } else if (unit.getAttribute('class') == 'monster') {
+    monsterBehavior(unit)
+  }
 }
-function moveUnitPosition(index, unit, x1, y1, andThen, b ) {
+
+function moveUnitPosition(index, unit, x1, y1, doSth ) {
+  
   pos0 = unit.parentNode.getAttribute('id')
   x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
   y0 = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
@@ -304,7 +362,11 @@ function moveUnitPosition(index, unit, x1, y1, andThen, b ) {
   }
 
   if (index >= dist + 1) {
-    try{ andThen(b)} catch(err){console.log('error',b)}
+    if (doSth ==true){
+      behavior(unit)
+    } else {
+      console.log('hej')
+    }
     return true;
   }
 
@@ -336,7 +398,7 @@ function moveUnitPosition(index, unit, x1, y1, andThen, b ) {
   index += 1;
 
   move(0, 0)
-  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1), 150);
+  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1, doSth), 10);
 }
 
 function moveUnitDistance(index, unit, vx, vy) {
@@ -677,32 +739,13 @@ function unequip(grabbedLoot) {
 }
 
 
+
+
 // Start Game
 check();
 checkStats();
 let Game = true;
 
-// GET DEM MERCHANTS MOVIN
-allMerchants = Array.from(document.getElementsByClassName('merchant'));
-for (m=0 ; m < allMerchants.length ; m++) {
-  
-}
 
-function merchantMove(){
 
-}
 
-let merchantMovePromise = new Promise((resolve, reject) => {
-  let a = 1 + 1
-  if (moveUnitPosition(0,Confucius,cities[1].pos[0],cities[1].pos[1], andThen, 'lol')) {
-    resolve('jugu')
-  } else {
-    reject('damn')
-  }
-})
-
-merchantMovePromise.then((message)=>{
-  console.log('then',message)
-}).catch((message)=>{
-  merchantMove()
-})
