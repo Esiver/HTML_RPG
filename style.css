@@ -6,8 +6,9 @@
 
 
     /* Global Variables */
-    --tile-width: 15px;
-    --tile-height: 15px;
+    --square: 25px;
+    --tile-width: var(--square);
+    --tile-height:  var(--square);
 }
 .settings {
   width: 300px;
@@ -43,18 +44,29 @@
   border:1px solid white;
   color: white;
   position: absolute;
-  height: calc(var(--tile-height)*2);
-  width: calc(var(--tile-width)*2);
+  height: calc(var(--tile-height)*5);
+  width: calc(var(--tile-width)*5);
+
 }
 .city ~ div{
   font-size: 0px;
+  
+}
+.city:nth-child(1){
+  
+  font-weight: 800;
+
 }
 .merchant{
+
   background-color: green;
   color: white;
   position: absolute;
   height: var(--tile-height);
   width: var(--tile-width);
+}
+.merchant p {
+  display: none;
 }
 .monster {
   background-color: yellow;

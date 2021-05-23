@@ -1,5 +1,7 @@
-var MAP_HEIGHT = 40;
-var MAP_WIDTH = 40;
+var MAP_HEIGHT = 70;
+var MAP_WIDTH = 40; 
+// sizes set in .css file, but could be done here as well (global css variable --square)
+
 var FOE_NUM = 20
 
 var PLAYER_HP = 100;
@@ -145,34 +147,78 @@ for(c=0 ; c< cities.length ; c++){
   city.setAttribute('wealth', cities[c].wealth)
   city.innerHTML = cities[c].name
   city.className ='city'
+  // make surrounding villages
+  for (amountOfVillages = 0 ; amountOfVillages < 5 ; amountOfVillages++){
+    //village_x = x 
+    console.log(' :', );
+  }
+  
+  //storage?
+  var furStore = document.createElement('div');
+  furStore.innerHTML = 'fur'
+  furStore.setAttribute('quantity', cities[c].resources[1])
+  furStore.setAttribute('id',furStore.innerHTML)
+  furStore.className = 'storage'
+
+  var stoneStore = document.createElement('div');
+  stoneStore.innerHTML = 'stone'
+  stoneStore.setAttribute('quantity', cities[c].resources[3])
+  stoneStore.setAttribute('id',stoneStore.innerHTML)
+  stoneStore.className = 'storage'
+  
+  city.append(furStore)
+  city.append(stoneStore)
   document.querySelector('#row-'+x_cord+'_col-'+y_cord).append(city)
 }
 
-//inventory
+//traded goods
+const createGoods = (type, amount=1) => {
+  let goods = document.createElement('p')
+  goods.innerHTML = type
+  return goods
+}
 
+//Villager/farmer class
+class Villager {
+  constructor(stead, trade, wealth) {
+    this.stead = stead;
+    this.trade = trade;
+    this.wealth = wealth
+  }
+  createVillager(){
+    let v = document.createElement('div')
+    v.innerHTML = 'villager';
+    v.setAttribute('wealth', self.wealth)
+    return v
+    }
+}
+var villager = new Villager('Domgaard', 'fur', 50).createVillager()
+document.querySelector('#row-015_col-015').append(villager)
 
+//the villagers live in villages!
+class Village {
+  constructor(name, wealth, product) {
+    this.name = name;
+    this.wealth = wealth;
+    this.product = product
+  }
+}
 
 //NPC:merchant class
 class merchant {
-  constructor(wealth, name, trade, x, y) {
+  constructor(wealth, name, trade) {
         this.wealth = wealth
         this.name = name
         this.trade = trade
-        this.x = x
-        this.y = y
-  }
 
+  }
   //rolll inventory
   rollInventory(){
-    let howMany = randomNumber(1,10);
+    let howMany = randomNumber(10,10);
     let items = []  
     for (i=0; i<howMany; i++) { 
-      console.log(this.trade)
-      items[i] = document.createElement('p')
-      items[i].innerHTML = this.trade
-      console.log(items[i])
+      items[i] = createGoods(this.trade)
     }
-    
     return items
   }
   createMerchant(){
@@ -180,38 +226,100 @@ class merchant {
     m.innerHTML = this.name
     m.setAttribute('wealth', this.wealth)
     m.setAttribute('trade', this.trade)
+    m.setAttribute('todo', 'sell')
     m.className = 'merchant'
 
     return m
   }
 }
-var SmithNPC = new merchant(500, 'Confucius', 'Stone', 30,30)
+var SmithNPC = new merchant(500, 'Confucius', 'stone')
+var WoolNPC = new merchant(500, 'Adam Smith', 'fur')
+
+
 let Confucius = SmithNPC.createMerchant()
-
-
-var WoolNPC = new merchant(500, 'Adam Smith', 'Fur', 20,20)
 let Adam = WoolNPC.createMerchant()
-Adam.append(...WoolNPC.rollInventory())
 
-document.querySelector('#row-030_col-030').append(Confucius)
+Adam.append(...WoolNPC.rollInventory())
+Confucius.append(...SmithNPC.rollInventory())
+
+document.querySelector('#row-020_col-020').append(Confucius)
 document.querySelector('#row-030_col-030').append(Adam)
 
 
 //merhchant behavior
 function merchantBehavior(merchant){
+  console.log('WEALTH', merchant.getAttribute('wealth'))
   let arrivedLocation = merchant.parentNode.firstChild // city DOM object, hopefully its the first object :D
   //if we arrive at city
   if (arrivedLocation.getAttribute('class') == 'city' ){
     //console.log(cities.name[arrivedLocation.firstChild])
-    console.log(merchant.getAttribute('trade'))
-    let fur_value = 30;
-
     
+    if (merchant.getAttribute('todo') =='sell') { //switch between buying / selling
+      merchant.setAttribute('todo', 'buy')
+    } else if (merchant.getAttribute('todo') == 'buy') { merchant.setAttribute('todo','sell')}
 
+    setTimeout(conductBusiness(merchant , merchant.getAttribute('todo')),2000)
+
+    let xD = randomNumber(0,4)
+    moveUnitPosition(0,merchant,cities[xD].pos[0], cities[xD].pos[1], true)
+    //merchantScanWorldPrice
+    //setTimeout(moveUnitToPosition(0, merchant), )
   }
   //let obj = cities.find(obj => obj.name == "Bootboot"); FINDS CITY WITH NAME
 }
-// Do something for every merchant
+
+// Selling stuff
+function conductBusiness(seller, todo='sell'){
+  //console.log('1 seller.children', seller.children)
+  let merchantInventory = seller.children
+  let sellAmount = 5//merchantInventory.length // needs smarter algo for determining how many to sell.
+  if (todo == 'sell'){
+    if (sellAmount > 0) {
+
+      for (s = 0 ; s < 10 ; s++) {
+        if (merchantInventory.length > 0){
+        trade('sell', seller, seller.parentNode.querySelector("#"+seller.getAttribute('trade')))
+        }
+      }
+    } else if (sellAmount == 0) {
+      console.log('not enough goods')
+    }
+  } else if (todo = 'buy') {
+
+    for (b = 0 ; b < 10 ; b++){
+      trade('buy', seller, seller.parentNode.querySelector("#"+seller.getAttribute('trade')))
+    }
+  }
+  //console.log('2 seller.children', seller.children)
+  //console.log('seller attribute wealth',seller.getAttribute('wealth') )
+  
+}
+
+const trade = (action, seller, tradedGood) => { //traded good is the OBJECT wished traded, stored in the city.
+  if (action == 'sell') {
+    price = calculatePrice(tradedGood.innerHTML)
+    seller.setAttribute('wealth', Number(seller.getAttribute('wealth'))+price)
+    seller.removeChild(seller.children[0])
+    tradedGood.setAttribute('quantity', Number(tradedGood.getAttribute('quantity')) + 1)
+    tradedGood.parentNode.setAttribute('wealth',Number(tradedGood.parentNode.getAttribute("wealth"))-price)
+  } else if (action == 'buy') {
+    price = calculatePrice(tradedGood.innerHTML, 5)
+    seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) - price)
+    seller.append(createGoods(tradedGood.innerHTML)) // give product to merchant
+    tradedGood.setAttribute('quantity', Number(tradedGood.getAttribute('quantity')) - 1); 
+    tradedGood.parentNode.setAttribute('wealth',Number(tradedGood.parentNode.getAttribute("wealth"))+price)
+  }
+}
+
+const calculatePrice = (itemName, bargain = 0) => {
+  if(itemName == "fur") {
+    return 39 - bargain //price fixed for now...
+  } else if (itemName == "stone") {
+    return 25 - bargain
+  }
+}
+
+// Initialize every merchant
 allMerchants = Array.from(document.getElementsByClassName('merchant'));
 for (m=0 ; m < allMerchants.length ; m++) {
   r = randomNumber(0, 4)
@@ -350,7 +458,7 @@ function behavior(unit) {
   }
 }
 
-function moveUnitPosition(index, unit, x1, y1, doSth ) {
+function moveUnitPosition(index, unit, x1, y1, doSth=false ) {
   
   pos0 = unit.parentNode.getAttribute('id')
   x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
@@ -361,12 +469,19 @@ function moveUnitPosition(index, unit, x1, y1, doSth ) {
     dist = Math.round(Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0))))
   }
 
-  if (index >= dist + 1) {
-    if (doSth ==true){
+  if (index > dist) {
+    
+    x1 = ('000' + (x1)).substr(-3);
+    y1 = ('000' + (y1)).substr(-3);
+    pos1 = 'row-' + x1 + '_col-' + y1;
+    document.querySelector('#' + pos1).append(unit)
+    if (doSth == true){
       behavior(unit)
     } else {
       console.log('hej')
     }
+
+    
     return true;
   }
 
@@ -398,7 +513,7 @@ function moveUnitPosition(index, unit, x1, y1, doSth ) {
   index += 1;
 
   move(0, 0)
-  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1, doSth), 10);
+  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1, doSth), 50);
 }
 
 function moveUnitDistance(index, unit, vx, vy) {
@@ -599,9 +714,6 @@ function grabLoot(lootElement, quantity) {
   }
   if (lootElement.getAttribute('type') == 'wear') {
     if (lootElement.getAttribute('slot') == 'lhand') {
-
-
-
       let equipBtn = document.createElement('button');
       equipBtn.className = 'equipBtn';
       equipBtn.innerHTML = 'Equip ';
@@ -737,9 +849,6 @@ function unequip(grabbedLoot) {
 
   checkStats();
 }
-
-
-
 
 // Start Game
 check();
