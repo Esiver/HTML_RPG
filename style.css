@@ -60,6 +60,8 @@
 
 .village {
   background-color: blue;
+  color: white;
+  position: absolute;
   height: var(--tile-height);
   width: var(--tile-width);
 }

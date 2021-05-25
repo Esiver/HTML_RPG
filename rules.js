@@ -34,19 +34,28 @@ for (w = 0; w < MAP_WIDTH; w++) {
     row.append(col);
   }
 }
-//Random function
+
+//utility functions
+
 function randomNumber(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-//consolelog!
+const digitsToPosition = (oox, ooy) => {
+  final_x = ('000' + (oox)).substr(-3);
+  final_y = ('000' + (ooy)).substr(-3);
+  return '#row-'+final_x+'_col-'+final_y
+}
+
 function status(message) {
   document.getElementById('console').innerHTML = 'Log (<strong>' + playerPosition.substring(0) + '</strong>): <br>' + message
   return message;
 }
 
+
+// -------------------------------------------------------------
 // Classes
 class Player {
   constructor(pos_x, pos_y, name, hp, atk, def) {
@@ -135,6 +144,35 @@ var cities = [
     "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
   }
 ]
+
+//Peasent class
+class Peasant {
+  constructor(stead, trade, wealth) {
+    this.stead = stead;
+    this.trade = trade;
+    this.wealth = wealth
+  }
+}
+
+function createPeasant(village, x, y, id, quantity) {
+  var peasentArray = new Peasant;
+  for (p = 0 ; p< quantity ; p++) {
+
+    console.log(' :', x, y);
+    peasentArray[p] = new Peasant(village.innerHTML, 'fur', 100)
+    console.log(peasentArray[p])
+  }
+}
+
+//the peasents live in villages!
+class Village {
+  constructor(name, wealth, product) {
+    this.name = name;
+    this.wealth = wealth;
+    this.product = product
+  }
+}
+
 //make cities
 for(c=0 ; c< cities.length ; c++){
   x = cities[c].pos[0]; 
@@ -149,17 +187,35 @@ for(c=0 ; c< cities.length ; c++){
   city.className ='city'
   // make surrounding villages
   for (amountOfVillages = 0 ; amountOfVillages < 5 ; amountOfVillages++){
+    vil_x = x + randomNumber(-5,5)
+    vil_y = y+ randomNumber(-5,5)
     //village_x = x 
-    vil_x = x + randomNumber(0,5);
-    vil_y = 6 + vil_x;
+    if (randomNumber(0, 20) > 10) {
+      vil_x = x + randomNumber(6, 9);
+    } else if (randomNumber(0, 20) < 10) {
+      vil_x = x + randomNumber(-9, -6);
+    }
+    
+    if(randomNumber(0,20) > 10) {
+      vil_y = y+ randomNumber(6,9)
+    } else {
+      vil_y = y+ randomNumber(-6,9)
+    }
+
+    if (vil_x > MAP_WIDTH ){ vil_x = MAP_WIDTH}
+    if (vil_x < 0) { vil_x = 0}
+    if (vil_y < 0){vil_y = (y+randomNumber(0,5))}
+    
     vil_x_cord = ('000' + (vil_x)).substr(-3);
     vil_y_cord = ('000' + (vil_y)).substr(-3);
 
     village = document.createElement('div')
     village.className = 'village'
+    village.setAttribute('city', cities[c].name)
+    village.innerHTML = 'village'//cities[c].name
 
     document.querySelector('#row-'+vil_x_cord+'_col-'+vil_y_cord).append(village)
-    console.log(' :', vil_x_cord, vil_y_cord);
+    createPeasant(village, vil_x_cord, vil_y_cord, amountOfVillages, randomNumber(10,15))
   }
   
   //storage?
@@ -187,31 +243,7 @@ const createGoods = (type, amount=1) => {
   return goods
 }
 
-//Villager/farmer class
-class Villager {
-  constructor(stead, trade, wealth) {
-    this.stead = stead;
-    this.trade = trade;
-    this.wealth = wealth
-  }
-  createVillager(){
-    let v = document.createElement('div')
-    v.innerHTML = 'villager';
-    v.setAttribute('wealth', self.wealth)
-    return v
-    }
-}
-var villager = new Villager('Domgaard', 'fur', 50).createVillager()
-document.querySelector('#row-015_col-015').append(villager)
 
-//the villagers live in villages!
-class Village {
-  constructor(name, wealth, product) {
-    this.name = name;
-    this.wealth = wealth;
-    this.product = product
-  }
-}
 
 //NPC:merchant class
 class merchant {
@@ -219,11 +251,10 @@ class merchant {
         this.wealth = wealth
         this.name = name
         this.trade = trade
-
   }
   //rolll inventory
   rollInventory(){
-    let howMany = randomNumber(10,10);
+    let howMany = randomNumber(10,10); //how many of that resource should the merchant carry?
     let items = []  
     for (i=0; i<howMany; i++) { 
       items[i] = createGoods(this.trade)
@@ -251,7 +282,7 @@ let Adam = WoolNPC.createMerchant()
 Adam.append(...WoolNPC.rollInventory())
 Confucius.append(...SmithNPC.rollInventory())
 
-document.querySelector('#row-020_col-020').append(Confucius)
+document.querySelector('#row-020_col-020').append(Confucius) //todo: figure out how to deploy & properly generate merchants. Not sure if manually?
 document.querySelector('#row-030_col-030').append(Adam)
 
 
@@ -478,12 +509,12 @@ function moveUnitPosition(index, unit, x1, y1, doSth=false ) {
     dist = Math.round(Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0))))
   }
 
-  if (index > dist) {
+  if (index > dist+5) {
     
     x1 = ('000' + (x1)).substr(-3);
     y1 = ('000' + (y1)).substr(-3);
     pos1 = 'row-' + x1 + '_col-' + y1;
-    document.querySelector('#' + pos1).append(unit)
+    document.querySelector(digitsToPosition(x1,y1)).append(unit)
     if (doSth == true){
       behavior(unit)
     } else {
