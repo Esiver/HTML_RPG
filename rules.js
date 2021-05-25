@@ -150,7 +150,16 @@ for(c=0 ; c< cities.length ; c++){
   // make surrounding villages
   for (amountOfVillages = 0 ; amountOfVillages < 5 ; amountOfVillages++){
     //village_x = x 
-    console.log(' :', );
+    vil_x = x + randomNumber(0,5);
+    vil_y = 6 + vil_x;
+    vil_x_cord = ('000' + (vil_x)).substr(-3);
+    vil_y_cord = ('000' + (vil_y)).substr(-3);
+
+    village = document.createElement('div')
+    village.className = 'village'
+
+    document.querySelector('#row-'+vil_x_cord+'_col-'+vil_y_cord).append(village)
+    console.log(' :', vil_x_cord, vil_y_cord);
   }
   
   //storage?

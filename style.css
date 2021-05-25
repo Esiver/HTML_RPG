@@ -55,7 +55,13 @@
 .city:nth-child(1){
   
   font-weight: 800;
+  
+}
 
+.village {
+  background-color: blue;
+  height: var(--tile-height);
+  width: var(--tile-width);
 }
 .merchant{
 
