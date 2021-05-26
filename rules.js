@@ -99,7 +99,6 @@ class Monster {
   constructor(alive, pos_x, pos_y, name, hp, atk) {
     this.alive = alive;
     this.pos_x = ('000' + pos_x).substr(-3)
-
     this.pos_y = ('000' + pos_y).substr(-3)
 
     this.name = name;
@@ -153,14 +152,19 @@ class Peasant {
     this.wealth = wealth
   }
 }
-
+const peasantAtPosition = () => {
+  return Array.from(document.querySelector(playerPosition).firstChild.getElementsByClassName('peasant'))
+}
 function createPeasant(village, x, y, id, quantity) {
   var peasentArray = new Peasant;
   for (p = 0 ; p< quantity ; p++) {
 
     console.log(' :', x, y);
     peasentArray[p] = new Peasant(village.innerHTML, 'fur', 100)
-    console.log(peasentArray[p])
+    populatePeasant = document.createElement('div')
+    populatePeasant.className = 'peasant';
+
+    village.append(populatePeasant);
   }
 }
 
@@ -659,9 +663,15 @@ function check() {
     if (unit.getAttribute('hp') <= 0) {
       unit.setAttribute('alive', 'false');
     }
+  peasantAtPosition().forEach((unit)=> {
+    console.log('i scanned a peasent.')
+  });
   });
   if (monsterAtPosition().length > 0) { // if monster array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(monsterAtPosition())
+  }
+  if (peasantAtPosition().length > 0) {
+    console.log('fix me, im showing a peasent.')
   }
 }
 
