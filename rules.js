@@ -1,6 +1,8 @@
 var MAP_HEIGHT = 70;
-var MAP_WIDTH = 40; 
+var MAP_WIDTH = 40;
 // sizes set in .css file, but could be done here as well (global css variable --square)
+
+var TIME_STEP = 550 // ms
 
 var FOE_NUM = 20
 
@@ -46,7 +48,14 @@ function randomNumber(min, max) {
 const digitsToPosition = (oox, ooy) => {
   final_x = ('000' + (oox)).substr(-3);
   final_y = ('000' + (ooy)).substr(-3);
-  return '#row-'+final_x+'_col-'+final_y
+  return '#row-' + final_x + '_col-' + final_y
+}
+
+const getUnitPosition = (unit) => {
+  pos0 = unit.parentNode.getAttribute('id')
+  x = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
+  y = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
+  return [x,y]
 }
 
 function status(message) {
@@ -54,6 +63,10 @@ function status(message) {
   return message;
 }
 
+const randomResource = () => {
+  resourceList = ['fur', 'wood', 'stone', 'gem']
+  return resourceList[Math.floor(Math.random() * resourceList.length)]
+}
 
 // -------------------------------------------------------------
 // Classes
@@ -105,42 +118,40 @@ class Monster {
     this.hp = hp;
     this.atk = atk;
   }
-
 }
 
 //cities
-var cities = [
-  {
-    "pos": [7,7],
-    "name":"Dogos",
+var cities = [{
+    "pos": [7, 7],
+    "name": "Dogos",
     "population": 1521,
     "owner": "Robert",
-    "wealth": 5000,
-    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+    "wealth": 3000,
+    "resources": [388, 321, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
   },
   {
-    "pos": [30,7],
-    "name":"Fargarth",
+    "pos": [30, 7],
+    "name": "Fargarth",
     "population": 421,
     "owner": "Bob",
-    "wealth": 12000,
-    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+    "wealth": 1200,
+    "resources": [223, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
   },
   {
-    "pos": [20,17],
-    "name":"Helbreth",
+    "pos": [20, 17],
+    "name": "Helbreth",
     "population": 2321,
     "owner": "Bob",
     "wealth": 1000,
-    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+    "resources": [341, 151, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
   },
   {
-    "pos": [08,37],
-    "name":"Bootboot",
+    "pos": [08, 37],
+    "name": "Bootboot",
     "population": 5321,
     "owner": "Diablo",
-    "wealth": 1000,
-    "resources" : [341, 421, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
+    "wealth": 1500,
+    "resources": [141, 221, 23, 12] //1: fur, 2: wood, 3: stone, 4:gem
   }
 ]
 
@@ -149,21 +160,28 @@ class Peasant {
   constructor(stead, trade, wealth) {
     this.stead = stead;
     this.trade = trade;
-    this.wealth = wealth
+    this.wealth = wealth;
+    this.belief = "nothing";
   }
 }
-const peasantAtPosition = () => {
-  return Array.from(document.querySelector(playerPosition).firstChild.getElementsByClassName('peasant'))
+const peasantAtPosition = (position=playerPosition) => {
+  return Array.from(document.querySelector(position).firstChild.getElementsByClassName('peasant'))
 }
+const peasantInVillage = () => { // todo
+  let villages = Array.from(document.getElementsByClassName('village'))
+  villages.forEach((village) => {
+    //console.log(village.childNodes[2])
+  })  
+}
+
 function createPeasant(village, x, y, id, quantity) {
   var peasentArray = new Peasant;
-  for (p = 0 ; p< quantity ; p++) {
-
-    console.log(' :', x, y);
+  for (p = 0; p < quantity; p++) {
     peasentArray[p] = new Peasant(village.innerHTML, 'fur', 100)
     populatePeasant = document.createElement('div')
     populatePeasant.className = 'peasant';
-
+    populatePeasant.innerHTML = id
+    populatePeasant.setAttribute('trade', randomResource()) //maybe let peasant trade depend on surroundings? later!
     village.append(populatePeasant);
   }
 }
@@ -177,101 +195,119 @@ class Village {
   }
 }
 
+function villageYield(){
+  
+}
 //make cities
-for(c=0 ; c< cities.length ; c++){
-  x = cities[c].pos[0]; 
+for (c = 0; c < cities.length; c++) {
+  x = cities[c].pos[0];
   y = cities[c].pos[1];
   x_cord = ('000' + (x)).substr(-3);
   y_cord = ('000' + (y)).substr(-3);
   var city = document.createElement('div');
-  city.setAttribute('owner',cities[c].owner)
+  city.setAttribute('owner', cities[c].owner)
   city.setAttribute('population', cities[c].population)
   city.setAttribute('wealth', cities[c].wealth)
   city.innerHTML = cities[c].name
-  city.className ='city'
+  city.setAttribute('name', cities[c].name)
+  city.className = 'city'
   // make surrounding villages
-  for (amountOfVillages = 0 ; amountOfVillages < 5 ; amountOfVillages++){
-    vil_x = x + randomNumber(-5,5)
-    vil_y = y+ randomNumber(-5,5)
+  for (amountOfVillages = 0; amountOfVillages < 5; amountOfVillages++) {
+    vil_x = x + randomNumber(-5, 5)
+    vil_y = y + randomNumber(-5, 5)
     //village_x = x 
     if (randomNumber(0, 20) > 10) {
       vil_x = x + randomNumber(6, 9);
     } else if (randomNumber(0, 20) < 10) {
       vil_x = x + randomNumber(-9, -6);
     }
-    
-    if(randomNumber(0,20) > 10) {
-      vil_y = y+ randomNumber(6,9)
+
+    if (randomNumber(0, 20) > 10) {
+      vil_y = y + randomNumber(6, 9)
     } else {
-      vil_y = y+ randomNumber(-6,9)
+      vil_y = y + randomNumber(-6, 9)
     }
 
-    if (vil_x > MAP_WIDTH ){ vil_x = MAP_WIDTH}
-    if (vil_x < 0) { vil_x = 0}
-    if (vil_y < 0){vil_y = (y+randomNumber(0,5))}
-    
+    if (vil_x > MAP_WIDTH) {
+      vil_x = MAP_WIDTH
+    }
+    if (vil_x < 0) {
+      vil_x = 0
+    }
+    if (vil_y < 0) {
+      vil_y = (y + randomNumber(0, 5))
+    }
+
     vil_x_cord = ('000' + (vil_x)).substr(-3);
     vil_y_cord = ('000' + (vil_y)).substr(-3);
 
     village = document.createElement('div')
     village.className = 'village'
     village.setAttribute('city', cities[c].name)
-    village.innerHTML = 'village'//cities[c].name
+    village.setAttribute('wealth', randomNumber(0,250))
+    village.innerHTML = 'village' //cities[c].name
 
-    document.querySelector('#row-'+vil_x_cord+'_col-'+vil_y_cord).append(village)
-    createPeasant(village, vil_x_cord, vil_y_cord, amountOfVillages, randomNumber(10,15))
+    document.querySelector('#row-' + vil_x_cord + '_col-' + vil_y_cord).append(village)
+    createPeasant(village, vil_x_cord, vil_y_cord, cities[c].name, randomNumber(10, 15))
   }
-  
+
   //storage?
   var furStore = document.createElement('div');
   furStore.innerHTML = 'fur'
   furStore.setAttribute('quantity', cities[c].resources[1])
-  furStore.setAttribute('id',furStore.innerHTML)
+  furStore.setAttribute('id', furStore.innerHTML)
   furStore.className = 'storage'
 
   var stoneStore = document.createElement('div');
   stoneStore.innerHTML = 'stone'
   stoneStore.setAttribute('quantity', cities[c].resources[3])
-  stoneStore.setAttribute('id',stoneStore.innerHTML)
+  stoneStore.setAttribute('id', stoneStore.innerHTML)
   stoneStore.className = 'storage'
-  
+
   city.append(furStore)
   city.append(stoneStore)
-  document.querySelector('#row-'+x_cord+'_col-'+y_cord).append(city)
+  document.querySelector('#row-' + x_cord + '_col-' + y_cord).append(city)
+}
+function cityRent (){
+  cities= Array.from(document.getElementsByClassName('city'))
+  for(c=0 ; c< cities.length ; c++){
+    rent = 1
+    totalRent = Number(cities[c].getAttribute('population')) * rent
+    cities[c].setAttribute('wealth', Number(cities[c].getAttribute('wealth'))+totalRent)
+  }
 }
 
 //traded goods
-const createGoods = (type, amount=1) => {
+const createGoods = (type, amount = 1) => {
   let goods = document.createElement('p')
   goods.innerHTML = type
   return goods
 }
 
-
-
 //NPC:merchant class
 class merchant {
   constructor(wealth, name, trade) {
-        this.wealth = wealth
-        this.name = name
-        this.trade = trade
+    this.wealth = wealth
+    this.name = name
+    this.trade = trade
   }
   //rolll inventory
-  rollInventory(){
-    let howMany = randomNumber(10,10); //how many of that resource should the merchant carry?
-    let items = []  
-    for (i=0; i<howMany; i++) { 
+  rollInventory() {
+    let howMany = randomNumber(10, 10); //how many of that resource should the merchant carry?
+    let items = []
+    for (i = 0; i < howMany; i++) {
       items[i] = createGoods(this.trade)
     }
     return items
   }
-  createMerchant(){
+  createMerchant() {
     let m = document.createElement('div')
     m.innerHTML = this.name
     m.setAttribute('wealth', this.wealth)
     m.setAttribute('trade', this.trade)
     m.setAttribute('todo', 'sell')
     m.className = 'merchant'
+    m.setAttribute('towards', cities[randomNumber(0,4)].name)
 
     return m
   }
@@ -289,40 +325,58 @@ Confucius.append(...SmithNPC.rollInventory())
 document.querySelector('#row-020_col-020').append(Confucius) //todo: figure out how to deploy & properly generate merchants. Not sure if manually?
 document.querySelector('#row-030_col-030').append(Adam)
 
+// get every merchant
+const allMerchants = Array.from(document.getElementsByClassName('merchant'));
+allMerchants.forEach((merchant)=> {
+  merchantBehavior(merchant)
+})
 
 //merhchant behavior
-function merchantBehavior(merchant){
-  console.log('WEALTH', merchant.getAttribute('wealth'))
-  let arrivedLocation = merchant.parentNode.firstChild // city DOM object, hopefully its the first object :D
-  //if we arrive at city
-  if (arrivedLocation.getAttribute('class') == 'city' ){
-    //console.log(cities.name[arrivedLocation.firstChild])
+function merchantBehavior(merchant) {
+
+console.log(' :', cities[0].name);
+    if (merchant.getAttribute('towards') != '' && merchant.parentNode.firstChild.className == 'city') {
+      merchant.setAttribute('towards', '');
+      setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')), 2000) //wait for 2 seconds after conducting business
+      merchant.setAttribute('towards', '');
+    }
+    else if (merchant.getAttribute('towards') != '' ){
+      var towards = cities.filter(city => {
+        return city.name === merchant.getAttribute('towards')
+      })
+
+      console.log(' :',towards ); //HERE EMIL
+      moveUnitTowards(merchant, towards[0])
+    }
+
+  
+  // let arrivedLocation = merchant.parentNode.firstChild // city DOM object, hopefully its the first object :D
+  // //if we arrive at city
+  // if (arrivedLocation.getAttribute('class') == 'city') {
+  //   if (merchant.getAttribute('todo') == 'sell') { //switch between buying / selling
+  //     merchant.setAttribute('todo', 'buy')
+  //   } else if (merchant.getAttribute('todo') == 'buy') {
+  //     merchant.setAttribute('todo', 'sell')
+  //   }
+
     
-    if (merchant.getAttribute('todo') =='sell') { //switch between buying / selling
-      merchant.setAttribute('todo', 'buy')
-    } else if (merchant.getAttribute('todo') == 'buy') { merchant.setAttribute('todo','sell')}
 
-    setTimeout(conductBusiness(merchant , merchant.getAttribute('todo')),2000)
-
-    let xD = randomNumber(0,4)
-    moveUnitPosition(0,merchant,cities[xD].pos[0], cities[xD].pos[1], true)
-    //merchantScanWorldPrice
-    //setTimeout(moveUnitToPosition(0, merchant), )
-  }
+  //   let xD = randomNumber(0, 4) // just move to random position for now, needs better AI for later, todo.
+  //   moveUnitPosition(0, merchant, cities[xD].pos[0], cities[xD].pos[1], true)
+  // }
   //let obj = cities.find(obj => obj.name == "Bootboot"); FINDS CITY WITH NAME
 }
 
 // Selling stuff
-function conductBusiness(seller, todo='sell'){
-  //console.log('1 seller.children', seller.children)
+function conductBusiness(seller, todo = 'sell') {
   let merchantInventory = seller.children
-  let sellAmount = 5//merchantInventory.length // needs smarter algo for determining how many to sell.
-  if (todo == 'sell'){
+  let sellAmount = 5 //merchantInventory.length // needs smarter algo for determining how many to sell.
+  if (todo == 'sell') {
     if (sellAmount > 0) {
 
-      for (s = 0 ; s < 10 ; s++) {
-        if (merchantInventory.length > 0){
-        trade('sell', seller, seller.parentNode.querySelector("#"+seller.getAttribute('trade')))
+      for (s = 0; s < 10; s++) {
+        if (merchantInventory.length > 0) {
+          trade('sell', seller, seller.parentNode.querySelector("#" + seller.getAttribute('trade')))
         }
       }
     } else if (sellAmount == 0) {
@@ -330,45 +384,36 @@ function conductBusiness(seller, todo='sell'){
     }
   } else if (todo = 'buy') {
 
-    for (b = 0 ; b < 10 ; b++){
-      trade('buy', seller, seller.parentNode.querySelector("#"+seller.getAttribute('trade')))
+    for (b = 0; b < 10; b++) {
+      trade('buy', seller, seller.parentNode.querySelector("#" + seller.getAttribute('trade')))
     }
   }
-  //console.log('2 seller.children', seller.children)
-  //console.log('seller attribute wealth',seller.getAttribute('wealth') )
-  
 }
 
 const trade = (action, seller, tradedGood) => { //traded good is the OBJECT wished traded, stored in the city.
   if (action == 'sell') {
     price = calculatePrice(tradedGood.innerHTML)
-    seller.setAttribute('wealth', Number(seller.getAttribute('wealth'))+price)
+    seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) + price)
     seller.removeChild(seller.children[0])
     tradedGood.setAttribute('quantity', Number(tradedGood.getAttribute('quantity')) + 1)
-    tradedGood.parentNode.setAttribute('wealth',Number(tradedGood.parentNode.getAttribute("wealth"))-price)
+    tradedGood.parentNode.setAttribute('wealth', Number(tradedGood.parentNode.getAttribute("wealth")) - price)
   } else if (action == 'buy') {
     price = calculatePrice(tradedGood.innerHTML, 5)
     seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) - price)
     seller.append(createGoods(tradedGood.innerHTML)) // give product to merchant
-    tradedGood.setAttribute('quantity', Number(tradedGood.getAttribute('quantity')) - 1); 
-    tradedGood.parentNode.setAttribute('wealth',Number(tradedGood.parentNode.getAttribute("wealth"))+price)
+    tradedGood.setAttribute('quantity', Number(tradedGood.getAttribute('quantity')) - 1);
+    tradedGood.parentNode.setAttribute('wealth', Number(tradedGood.parentNode.getAttribute("wealth")) + price)
   }
 }
 
 const calculatePrice = (itemName, bargain = 0) => {
-  if(itemName == "fur") {
+  if (itemName == "fur") {
     return 39 - bargain //price fixed for now...
   } else if (itemName == "stone") {
     return 25 - bargain
   }
 }
 
-// Initialize every merchant
-allMerchants = Array.from(document.getElementsByClassName('merchant'));
-for (m=0 ; m < allMerchants.length ; m++) {
-  r = randomNumber(0, 4)
-  moveUnitPosition(0,allMerchants[m],cities[r].pos[0], cities[r].pos[1], true)
-}
 
 
 //Monster names
@@ -385,7 +430,7 @@ var weaponNames = ['Sword of Truths', 'Sword of a Thousand Truths', 'Mace', 'Bro
 var bodyNamesLow = ['Ragged Shirt', 'T-shirt', 'Tunica', 'Polo']
 
 class weapon { // todo: also create classes for other equipment + trash.
-  
+
   constructor(type, dmg, title, slot) {
     this.type = type;
     this.dmg = dmg;
@@ -475,7 +520,7 @@ for (var i = 0; i < FOE_NUM; i++) {
     loot.setAttribute('type', 'trash')
     loot.innerHTML = 'trash';
   } else if (lootChance < 97.33) {
-    
+
     loot.setAttribute('quantity', 1)
     let subChance = randomNumber(1, 100);
     if (subChance > 50) {
@@ -495,15 +540,43 @@ for (var i = 0; i < FOE_NUM; i++) {
 
 function behavior(unit) {
   //if merchant
-  if (unit.getAttribute('class') == 'merchant'){
+  if (unit.getAttribute('class') == 'merchant') { 
     merchantBehavior(unit)
   } else if (unit.getAttribute('class') == 'monster') {
     monsterBehavior(unit)
   }
 }
 
-function moveUnitPosition(index, unit, x1, y1, doSth=false ) {
+function moveUnitTowards(unit, endDOM){
+  x0 = getUnitPosition(unit)[0]
+  y0 = getUnitPosition(unit)[1]
+  x1 = getUnitPosition(endDOM)[0]
+  y1 = getUnitPosition(endDOM)[1]
+
+  if (x0 < x1) { // if current x is smaller than goal x
+    vx = x0 + 1; // increment x by speed 1
+  } else if (x0 > x1) { // else if we're more right on the x-axis, 
+    vx = x0 - 1 // increment position by speed -1
+  } else {
+    vx = x0;
+  } // else we just put our self at endpoint to make sure :D
   
+    if (y0 < y1) {
+    vy = y0 + 1;
+  } else if (y0 > y1) {
+    vy = y0 - 1
+  } else {
+    vy = y0
+  }
+  vx = ('000' + (vx)).substr(-3);
+  vy = ('000' + (vy)).substr(-3);
+  pos1 = 'row-' + vx + '_col-' + vy;
+  
+  document.querySelector('#' + pos1).append(unit)
+}
+
+function moveUnitPosition(index, unit, x1, y1, doSth = false) {
+
   pos0 = unit.parentNode.getAttribute('id')
   x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
   y0 = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
@@ -513,19 +586,19 @@ function moveUnitPosition(index, unit, x1, y1, doSth=false ) {
     dist = Math.round(Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0))))
   }
 
-  if (index > dist+5) {
-    
+  if (index > dist + 5) {
+
     x1 = ('000' + (x1)).substr(-3);
     y1 = ('000' + (y1)).substr(-3);
     pos1 = 'row-' + x1 + '_col-' + y1;
-    document.querySelector(digitsToPosition(x1,y1)).append(unit)
-    if (doSth == true){
+    document.querySelector(digitsToPosition(x1, y1)).append(unit)
+    if (doSth == true) { 
       behavior(unit)
     } else {
       console.log('hej')
     }
 
-    
+
     return true;
   }
 
@@ -557,7 +630,7 @@ function moveUnitPosition(index, unit, x1, y1, doSth=false ) {
   index += 1;
 
   move(0, 0)
-  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1, doSth), 50);
+  setTimeout(moveUnitPosition.bind({}, index, unit, x1, y1, doSth), TIME_STEP);
 }
 
 function moveUnitDistance(index, unit, vx, vy) {
@@ -663,15 +736,15 @@ function check() {
     if (unit.getAttribute('hp') <= 0) {
       unit.setAttribute('alive', 'false');
     }
-  peasantAtPosition().forEach((unit)=> {
-    console.log('i scanned a peasent.')
   });
+  peasantAtPosition().forEach((unit) => {
+    console.log('i scanned a peasent.', unit.getAttribute('trade'))
   });
   if (monsterAtPosition().length > 0) { // if monster array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(monsterAtPosition())
   }
   if (peasantAtPosition().length > 0) {
-    console.log('fix me, im showing a peasent.')
+    unitEncounter(peasantAtPosition());
   }
 }
 
@@ -698,7 +771,7 @@ function handleCombat(monsters, player) {
 }
 
 function handleDmg(giver, receiver, amount, type) {
-  receiver.setAttribute("hp", Math.floor(receiver.getAttribute("hp") - amount*5));
+  receiver.setAttribute("hp", Math.floor(receiver.getAttribute("hp") - amount * 5));
   status(giver + ' attacks ' + receiver.innerHTML + ' for ' + amount + ' ' + type + ' damage.')
 }
 
@@ -723,12 +796,19 @@ function createUnitCard(mapHTML, hp, atk, classType, id) {
     document.querySelector('.monster-arena').appendChild(cardDOM);
 
   }
-  if (classType == 'trader') {
-    console.log("You've met a trader.")
+  if (classType == 'merchant') {
+    console.log("You've met a merchant.")
+  }
+  if (classType == 'peasant') {
+    console.log("You've met a peasant.")
   }
   return cardDOM
 }
-
+function unitEncounter(units){
+  for (var u = 0 ; u < units.length; u++) {
+    let unitDOM = createUnitCard(units[u])
+  }
+}
 function monsterEncounter(monsters) { // takes array of monsters
   for (var i = 0; i < monsters.length; i++) {
     let monsterDOM = createUnitCard(monsters[i].innerHTML, monsters[i].getAttribute('hp'), monsters[i].getAttribute('atk'), 'monster', playerPosition.substring(1) + '-card-' + i)
@@ -870,7 +950,7 @@ function equip(grabbedLoot) {
       unequip(grabbedLoot)
     })
     equipSlot.append(equipment)
-    status('Equipped '+grabbedLoot.className+" '"+grabbedLoot.firstChild.wholeText+"' for ")
+    status('Equipped ' + grabbedLoot.className + " '" + grabbedLoot.firstChild.wholeText + "' for ")
     if (grabbedLoot.className == 'weapon') {
       player_one.atk = grabbedLoot.getAttribute('dmg');
       pPos.setAttribute('atk', grabbedLoot.getAttribute('dmg'));
@@ -900,11 +980,19 @@ function unequip(grabbedLoot) {
   checkStats();
 }
 
+//Game 
+function GameCycle() {
+  if (Game == true){
+    villageYield()
+    cityRent()
+    //merchantBehavior(allMerchants)
+
+    setTimeout(GameCycle.bind({}), TIME_STEP*1)
+  }
+}
 // Start Game
 check();
 checkStats();
+//peasantInVillage()
 let Game = true;
-
-
-
-
+GameCycle();
