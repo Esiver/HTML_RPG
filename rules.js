@@ -333,19 +333,25 @@ allMerchants.forEach((merchant)=> {
 
 //merhchant behavior
 function merchantBehavior(merchant) {
+    if (merchant.parentNode.firstChild.className == merchant.getAttribute('towarwds')) {
 
-console.log(' :', cities[0].name);
-    if (merchant.getAttribute('towards') != '' && merchant.parentNode.firstChild.className == 'city') {
+      console.log(' :',1 );
       merchant.setAttribute('towards', '');
       setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')), 2000) //wait for 2 seconds after conducting business
-      merchant.setAttribute('towards', '');
+      merchant.setAttribute('towards', 'Fargarth');
+      merchantBehavior(merchant)
     }
     else if (merchant.getAttribute('towards') != '' ){
-      var towards = cities.filter(city => {
-        return city.name === merchant.getAttribute('towards')
-      })
 
-      console.log(' :',towards ); //HERE EMIL
+      console.log(' :',2 );
+      // var towards = cities.filter(city => {
+      //   return city.name === merchant.getAttribute('towards')
+      // })
+
+      nextCity = cities[randomNumber(0,4)]
+      console.log(' 000:', nextCity, nextCity.firstChild.getAttribute('name'));
+      var towards = document.querySelectorAll('[name="'+cities[randomNumber(0,4)].name+'"]');
+      console.log(' :',towards[0]);
       moveUnitTowards(merchant, towards[0])
     }
 
@@ -548,6 +554,8 @@ function behavior(unit) {
 }
 
 function moveUnitTowards(unit, endDOM){
+
+  console.log(' :______' );
   x0 = getUnitPosition(unit)[0]
   y0 = getUnitPosition(unit)[1]
   x1 = getUnitPosition(endDOM)[0]
@@ -572,6 +580,7 @@ function moveUnitTowards(unit, endDOM){
   vy = ('000' + (vy)).substr(-3);
   pos1 = 'row-' + vx + '_col-' + vy;
   
+  console.log(' :', pos1);
   document.querySelector('#' + pos1).append(unit)
 }
 
@@ -985,7 +994,7 @@ function GameCycle() {
   if (Game == true){
     villageYield()
     cityRent()
-    //merchantBehavior(allMerchants)
+    merchantBehavior(...allMerchants)
 
     setTimeout(GameCycle.bind({}), TIME_STEP*1)
   }
