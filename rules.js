@@ -333,19 +333,20 @@ allMerchants.forEach((merchant)=> {
 
 //merhchant behavior
 function merchantBehavior(merchant) {
+    if (merchant.parentNode.firstChild.getAttribute('name') == merchant.getAttribute('towards') ) {
 
-console.log(' :', cities[0].name);
-    if (merchant.getAttribute('towards') != '' && merchant.parentNode.firstChild.className == 'city') {
-      merchant.setAttribute('towards', '');
-      setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')), 2000) //wait for 2 seconds after conducting business
-      merchant.setAttribute('towards', '');
+      
+      //merchant.setAttribute('towards', '');
+      //setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')), 2000) //wait for 2 seconds after conducting business
+      merchant.setAttribute('towards', cities[randomNumber(0,4)].getAttribute('name'));
     }
     else if (merchant.getAttribute('towards') != '' ){
-      var towards = cities.filter(city => {
-        return city.name === merchant.getAttribute('towards')
+      ccc = Array.from(document.getElementsByClassName('city'))
+      towards = ccc.filter(city => {
+        return city.getAttribute('name') === merchant.getAttribute('towards')
       })
-
-      console.log(' :',towards ); //HERE EMIL
+      console.log('guy')
+      // console.log(' ...:',towards[0].name, ccc, towardsx ); //HERE EMIL
       moveUnitTowards(merchant, towards[0])
     }
 
@@ -985,9 +986,9 @@ function GameCycle() {
   if (Game == true){
     villageYield()
     cityRent()
-    //merchantBehavior(allMerchants)
+    merchantBehavior(...allMerchants)
 
-    setTimeout(GameCycle.bind({}), TIME_STEP*1)
+    setTimeout(GameCycle.bind({}), TIME_STEP*0.1)
   }
 }
 // Start Game
