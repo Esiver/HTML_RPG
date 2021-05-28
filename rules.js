@@ -549,6 +549,8 @@ function behavior(unit) {
 }
 
 function moveUnitTowards(unit, endDOM){
+
+  console.log(' :______' );
   x0 = getUnitPosition(unit)[0]
   y0 = getUnitPosition(unit)[1]
   x1 = getUnitPosition(endDOM)[0]
@@ -573,6 +575,7 @@ function moveUnitTowards(unit, endDOM){
   vy = ('000' + (vy)).substr(-3);
   pos1 = 'row-' + vx + '_col-' + vy;
   
+  console.log(' :', pos1);
   document.querySelector('#' + pos1).append(unit)
 }
 
