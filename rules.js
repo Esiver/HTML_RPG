@@ -327,17 +327,17 @@ document.querySelector('#row-030_col-030').append(Adam)
 
 // get every merchant
 const allMerchants = Array.from(document.getElementsByClassName('merchant'));
-allMerchants.forEach((merchant)=> {
-  merchantBehavior(merchant)
-})
-
 //merhchant behavior
 function merchantBehavior(merchant) {
-    if (merchant.parentNode.firstChild.getAttribute('name') == merchant.getAttribute('towards') ) {
-
-      
-      //merchant.setAttribute('towards', '');
-      //setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')), 2000) //wait for 2 seconds after conducting business
+  if (merchant.parentNode.firstChild.innerHTML == 'player'){
+    Game = false; // Pause
+    createUnitCard('merchant', 10, 10, 'merchant', merchant.innerHTML)
+  }
+  else if (merchant.parentNode.firstChild.getAttribute('name') == merchant.getAttribute('towards') ) {
+      setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')),5000);
+      if ( merchant.getAttribute('todo')=='sell'){
+        merchant.setAttribute('todo', 'buy');
+      } else {merchant.setAttribute('todo', 'sell')}
       merchant.setAttribute('towards', cities[randomNumber(0,4)].getAttribute('name'));
     }
     else if (merchant.getAttribute('towards') != '' ){
@@ -345,26 +345,9 @@ function merchantBehavior(merchant) {
       towards = ccc.filter(city => {
         return city.getAttribute('name') === merchant.getAttribute('towards')
       })
-      console.log('guy')
-      // console.log(' ...:',towards[0].name, ccc, towardsx ); //HERE EMIL
       moveUnitTowards(merchant, towards[0])
     }
-
-  
-  // let arrivedLocation = merchant.parentNode.firstChild // city DOM object, hopefully its the first object :D
-  // //if we arrive at city
-  // if (arrivedLocation.getAttribute('class') == 'city') {
-  //   if (merchant.getAttribute('todo') == 'sell') { //switch between buying / selling
-  //     merchant.setAttribute('todo', 'buy')
-  //   } else if (merchant.getAttribute('todo') == 'buy') {
-  //     merchant.setAttribute('todo', 'sell')
-  //   }
-
     
-
-  //   let xD = randomNumber(0, 4) // just move to random position for now, needs better AI for later, todo.
-  //   moveUnitPosition(0, merchant, cities[xD].pos[0], cities[xD].pos[1], true)
-  // }
   //let obj = cities.find(obj => obj.name == "Bootboot"); FINDS CITY WITH NAME
 }
 
@@ -393,12 +376,16 @@ function conductBusiness(seller, todo = 'sell') {
 
 const trade = (action, seller, tradedGood) => { //traded good is the OBJECT wished traded, stored in the city.
   if (action == 'sell') {
+
+    console.log(' whataya sellin:', );
     price = calculatePrice(tradedGood.innerHTML)
     seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) + price)
     seller.removeChild(seller.children[0])
     tradedGood.setAttribute('quantity', Number(tradedGood.getAttribute('quantity')) + 1)
     tradedGood.parentNode.setAttribute('wealth', Number(tradedGood.parentNode.getAttribute("wealth")) - price)
   } else if (action == 'buy') {
+
+    console.log(' wahhata buyin:', );
     price = calculatePrice(tradedGood.innerHTML, 5)
     seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) - price)
     seller.append(createGoods(tradedGood.innerHTML)) // give product to merchant
@@ -550,11 +537,8 @@ function behavior(unit) {
 
 function moveUnitTowards(unit, endDOM){
 
-  console.log(' :______' );
-  x0 = getUnitPosition(unit)[0]
-  y0 = getUnitPosition(unit)[1]
-  x1 = getUnitPosition(endDOM)[0]
-  y1 = getUnitPosition(endDOM)[1]
+  x0 = getUnitPosition(unit)[0]; y0 = getUnitPosition(unit)[1];
+  x1 = getUnitPosition(endDOM)[0]; y1 = getUnitPosition(endDOM)[1];
 
   if (x0 < x1) { // if current x is smaller than goal x
     vx = x0 + 1; // increment x by speed 1
@@ -574,8 +558,7 @@ function moveUnitTowards(unit, endDOM){
   vx = ('000' + (vx)).substr(-3);
   vy = ('000' + (vy)).substr(-3);
   pos1 = 'row-' + vx + '_col-' + vy;
-  
-  console.log(' :', pos1);
+
   document.querySelector('#' + pos1).append(unit)
 }
 
@@ -584,9 +567,7 @@ function moveUnitPosition(index, unit, x1, y1, doSth = false) {
   pos0 = unit.parentNode.getAttribute('id')
   x0 = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
   y0 = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
-
   if (index == 0) {
-    // distance, rounding upwards for fun. otherwise Math.round
     dist = Math.round(Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0))))
   }
 
@@ -700,6 +681,11 @@ function moveUnitDistance(index, unit, vx, vy) {
 
 // key presses & control
 function move(x, y) {
+  if (!Game){
+    Game = true;
+    GameCycle();
+  }
+  
   // ('000' + pos_y).substr(-3)
   x = Number(x)
 
@@ -716,6 +702,7 @@ function move(x, y) {
 document.addEventListener('keydown', logKey);
 
 function logKey(e) {
+
   if (e.code == 'KeyA' && player_one.pos_x != 0) {
     move(-1, 0);
   } else if (e.code == 'KeyD' && player_one.pos_x < MAP_WIDTH - 1) {
@@ -736,6 +723,7 @@ function clearEncounters() { // clears all monsters from Encounters-section
 
 // position CHECK function, updates cards according to map units. 
 function check() {
+
   monsterAtPosition().forEach((unit) => { //check all, if monster health is 0 or below call it Dead
     if (unit.getAttribute('hp') <= 0) {
       unit.setAttribute('alive', 'false');
@@ -802,6 +790,7 @@ function createUnitCard(mapHTML, hp, atk, classType, id) {
   }
   if (classType == 'merchant') {
     console.log("You've met a merchant.")
+    document.querySelector('.monster-arena').appendChild(cardDOM)
   }
   if (classType == 'peasant') {
     console.log("You've met a peasant.")
@@ -988,10 +977,16 @@ function unequip(grabbedLoot) {
 function GameCycle() {
   if (Game == true){
     villageYield()
-    cityRent()
-    merchantBehavior(...allMerchants)
-
-    setTimeout(GameCycle.bind({}), TIME_STEP*0.1)
+    if (cityRentOn){
+      cityRent()
+    }
+    
+    // merchantBehavior(...allMerchants)
+    if (merchantBehaviorOn){
+      merchantBehavior(Adam)
+      merchantBehavior(Confucius)
+    }
+    setTimeout(GameCycle.bind({}), TIME_STEP*0.2)
   }
 }
 // Start Game
@@ -999,4 +994,6 @@ check();
 checkStats();
 //peasantInVillage()
 let Game = true;
+let cityRentOn = true;
+let merchantBehaviorOn = true;
 GameCycle();
