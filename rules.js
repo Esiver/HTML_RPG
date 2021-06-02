@@ -331,7 +331,7 @@ const allMerchants = Array.from(document.getElementsByClassName('merchant'));
 function merchantBehavior(merchant) {
   if (merchant.parentNode.firstChild.innerHTML == 'player'){
     Game = false; // Pause
-    createUnitCard('merchant', 10, 10, 'merchant', merchant.innerHTML)
+    createUnitCard(merchant, 10, 10, 'merchant', merchant.parentNode.getAttribute('id'))
   }
   else if (merchant.parentNode.firstChild.getAttribute('name') == merchant.getAttribute('towards') ) {
       setTimeout(conductBusiness(merchant, merchant.getAttribute('todo')),5000);
@@ -377,7 +377,6 @@ function conductBusiness(seller, todo = 'sell') {
 const trade = (action, seller, tradedGood) => { //traded good is the OBJECT wished traded, stored in the city.
   if (action == 'sell') {
 
-    console.log(' whataya sellin:', );
     price = calculatePrice(tradedGood.innerHTML)
     seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) + price)
     seller.removeChild(seller.children[0])
@@ -385,7 +384,6 @@ const trade = (action, seller, tradedGood) => { //traded good is the OBJECT wish
     tradedGood.parentNode.setAttribute('wealth', Number(tradedGood.parentNode.getAttribute("wealth")) - price)
   } else if (action == 'buy') {
 
-    console.log(' wahhata buyin:', );
     price = calculatePrice(tradedGood.innerHTML, 5)
     seller.setAttribute('wealth', Number(seller.getAttribute('wealth')) - price)
     seller.append(createGoods(tradedGood.innerHTML)) // give product to merchant
@@ -415,7 +413,7 @@ function QualityRoll() {
 
 //Loot Class
 var weaponNames = ['Sword of Truths', 'Sword of a Thousand Truths', 'Mace', 'Broken Mace', 'Knife', 'Dull Knife', 'Morning Star', 'Stick', 'Sharp Stone', 'Broken Bottle', 'Wand', 'Excallibur'];
-var bodyNamesLow = ['Ragged Shirt', 'T-shirt', 'Tunica', 'Polo']
+var bodyNamesLow = ['Ragged Shirt', 'T-shirt', 'Tunica', 'Polo', 'Dress']
 
 class weapon { // todo: also create classes for other equipment + trash.
 
@@ -786,10 +784,12 @@ function createUnitCard(mapHTML, hp, atk, classType, id) {
   // only allow attacking if monster--- Maybe change in future?
   if (classType == 'monster') {
     document.querySelector('.monster-arena').appendChild(cardDOM);
-
   }
   if (classType == 'merchant') {
     console.log("You've met a merchant.")
+    console.log(' :--', id);
+    console.log(' :', mapHTML );
+    cardDOM.innerHTML = '<div class=' + classType + '_info"> <name>' + mapHTML.firstChild.textContent + "</name><span class=" + classType + "-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>';
     document.querySelector('.monster-arena').appendChild(cardDOM)
   }
   if (classType == 'peasant') {
