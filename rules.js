@@ -314,17 +314,19 @@ class merchant {
 }
 var SmithNPC = new merchant(500, 'Confucius', 'stone')
 var WoolNPC = new merchant(500, 'Adam Smith', 'fur')
-
+var WoodNPC = new merchant(400, 'Lumberjack Jim', 'wood')
 
 let Confucius = SmithNPC.createMerchant()
 let Adam = WoolNPC.createMerchant()
+let Jim = WoodNPC.createMerchant()
 
 Adam.append(...WoolNPC.rollInventory())
 Confucius.append(...SmithNPC.rollInventory())
+Jim.append(...WoodNPC.rollInventory())
 
 document.querySelector('#row-020_col-020').append(Confucius) //todo: figure out how to deploy & properly generate merchants. Not sure if manually?
 document.querySelector('#row-030_col-030').append(Adam)
-
+document.querySelector('#row-001_col-000').append(Jim)
 // get every merchant
 const allMerchants = Array.from(document.getElementsByClassName('merchant'));
 //merhchant behavior
@@ -675,11 +677,9 @@ function moveUnitDistance(index, unit, vx, vy) {
   setTimeout(moveUnitDistance.bind({}, index, unit, vx, vy), 150);
 }
 
-
-
 // key presses & control
 function move(x, y) {
-  if (!Game){
+  if (!Game){ //if for some reason game paused, resume game. 
     Game = true;
     GameCycle();
   }
@@ -721,7 +721,6 @@ function clearEncounters() { // clears all monsters from Encounters-section
 
 // position CHECK function, updates cards according to map units. 
 function check() {
-
   monsterAtPosition().forEach((unit) => { //check all, if monster health is 0 or below call it Dead
     if (unit.getAttribute('hp') <= 0) {
       unit.setAttribute('alive', 'false');
@@ -786,17 +785,32 @@ function createUnitCard(mapHTML, hp, atk, classType, id) {
     document.querySelector('.monster-arena').appendChild(cardDOM);
   }
   if (classType == 'merchant') {
-    console.log("You've met a merchant.")
-    console.log(' :--', id);
-    console.log(' :', mapHTML );
+    status("you have met merchant "+mapHTML.firstChild.textContent);
+   
     cardDOM.innerHTML = '<div class=' + classType + '_info"> <name>' + mapHTML.firstChild.textContent + "</name><span class=" + classType + "-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>';
     document.querySelector('.monster-arena').appendChild(cardDOM)
+    for(c = 0 ; c < mapHTML.children.length ; c++) {
+      createMerchantShop(mapHTML.children[c] , cardDOM);
+    }
   }
   if (classType == 'peasant') {
     console.log("You've met a peasant.")
   }
   return cardDOM
 }
+
+function createMerchantShop (item, merchantCard){
+  console.log(item, merchantCard);
+  shopItem = document.createElement('button');
+  shopItem.innerHTML = item.innerHTML + ' | ' +calculatePrice(item.innerHTML);
+  shopItem.className = 'shop-item';
+  shopItem.setAttribute('type', 'goods');
+  
+  
+  merchantCard.appendChild(shopItem)
+  shopItem.addEventListener('click' , function(){grabLoot(shopItem)});
+}
+
 function unitEncounter(units){
   for (var u = 0 ; u < units.length; u++) {
     let unitDOM = createUnitCard(units[u])
@@ -825,12 +839,11 @@ function grabLoot(lootElement, quantity) {
   let grabbedLoot = document.createElement('li')
 
   if (lootElement.getAttribute('type') == 'gold') {
-    console.log('jubii')
     grabbedLoot.className = 'gold'
     grabbedLoot.setAttribute('quantity', lootElement.getAttribute('quantity'))
   }
-  if (lootElement.getAttribute('type') == 'trash') {
-    grabbedLoot.className = 'trash'
+  if (lootElement.getAttribute('type') == 'goods') {
+    grabbedLoot.className = 'goods'
   }
   if (lootElement.getAttribute('type') == 'trash') {
     grabbedLoot.className = 'trash'

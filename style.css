@@ -76,6 +76,17 @@
 .merchant p {
   display: none;
 }
+.merchant-card {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-height: 350px;
+}
+.merchant-card button {
+  width: 100px;
+  height: 30px;
+  margin: 5px;
+}
 .monster {
   background-color: yellow;
   height: var(--tile-height);
