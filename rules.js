@@ -68,6 +68,10 @@ const randomResource = () => {
   return resourceList[Math.floor(Math.random() * resourceList.length)]
 }
 
+const merchantAtPosition = () => {
+  return Array.from(document.querySelector(playerPosition).getElementsByClassName('merchant'))
+}
+
 // -------------------------------------------------------------
 // Classes
 class Player {
@@ -167,6 +171,7 @@ class Peasant {
 const peasantAtPosition = (position=playerPosition) => {
   return Array.from(document.querySelector(position).firstChild.getElementsByClassName('peasant'))
 }
+
 const peasantInVillage = () => { // todo
   let villages = Array.from(document.getElementsByClassName('village'))
   villages.forEach((village) => {
@@ -196,7 +201,7 @@ class Village {
 }
 
 function villageYield(){
-  
+ // todo  
 }
 //make cities
 for (c = 0; c < cities.length; c++) {
@@ -729,12 +734,19 @@ function check() {
   peasantAtPosition().forEach((unit) => {
     console.log('i scanned a peasent.', unit.getAttribute('trade'))
   });
+  merchantAtPosition().forEach((unit) => {
+    console.log('theres a merchant')
+  });
+
   if (monsterAtPosition().length > 0) { // if monster array length is greater than 0 (there's monsters!) fire monster encounter event.
     monsterEncounter(monsterAtPosition())
   }
   if (peasantAtPosition().length > 0) {
     unitEncounter(peasantAtPosition());
   }
+  if (merchantAtPosition().length > 0) {
+    unitEncounter(merchantAtPosition());
+  };
 }
 
 function checkStats() {
@@ -806,16 +818,25 @@ function createMerchantShop (item, merchantCard){
   shopItem.className = 'shop-item';
   shopItem.setAttribute('type', 'goods');
   
-  
   merchantCard.appendChild(shopItem)
   shopItem.addEventListener('click' , function(){grabLoot(shopItem)});
 }
 
-function unitEncounter(units){
-  for (var u = 0 ; u < units.length; u++) {
-    let unitDOM = createUnitCard(units[u])
+function merhcantEncounter(merchants) {
+  for( m = 0 ; m< merchants.length; m++){
+    
+    console.log(' MERCHANT ENCOUNTER:', );
   }
 }
+
+function unitEncounter(units){
+  for (var u = 0 ; u < units.length; u++) {
+    console.log(units, 'EMIL HERE') // EMIL HERE
+    createUnitCard(units[u], 10, 10, 'merchant', units[u].parentNode.getAttribute('id'))
+  }
+}
+
+
 function monsterEncounter(monsters) { // takes array of monsters
   for (var i = 0; i < monsters.length; i++) {
     let monsterDOM = createUnitCard(monsters[i].innerHTML, monsters[i].getAttribute('hp'), monsters[i].getAttribute('atk'), 'monster', playerPosition.substring(1) + '-card-' + i)
@@ -986,7 +1007,7 @@ function unequip(grabbedLoot) {
   checkStats();
 }
 
-//Game 
+//Game
 function GameCycle() {
   if (Game == true){
     villageYield()
@@ -1010,3 +1031,15 @@ let Game = true;
 let cityRentOn = true;
 let merchantBehaviorOn = true;
 GameCycle();
+
+
+// Admin stuff
+merchantBehaviorBtn = document.getElementById('ADMIN_merchantBehavior')
+merchantBehaviorBtn.addEventListener('click', function () {
+  merchantBehaviorToggle()}
+  );
+function merchantBehaviorToggle () {
+  merchantBehaviorOn = !merchantBehaviorOn; 
+  console.log(' :', merchantBehaviorOn);
+}
+//
