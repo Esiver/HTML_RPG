@@ -748,7 +748,7 @@ function check() {
     unitEncounter(peasantAtPosition());
   }
   if (merchantAtPosition().length > 0) {
-    unitEncounter(merchantAtPosition());
+    merchantEncounter(merchantAtPosition());
   };
 }
 
@@ -801,15 +801,17 @@ function createUnitCard(mapHTML, hp, atk, classType, id) {
   }
   if (classType == 'merchant') {
     status("you have met merchant "+mapHTML.firstChild.textContent);
-   
     cardDOM.innerHTML = '<div class=' + classType + '_info"> <name>' + mapHTML.firstChild.textContent + "</name><span class=" + classType + "-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src='+mapHTML.firstChild.innerHTML+'.jpg>';
     document.querySelector('.monster-arena').appendChild(cardDOM)
-    for(c = 0 ; c < mapHTML.children.length ; c++) {
-      createMerchantShop(mapHTML.children[c] , cardDOM);
-    }
+    // 
+    // document.querySelector('.monster-arena').appendChild(cardDOM)
+    // for(c = 0 ; c < mapHTML.children.length ; c++) {
+    //   createMerchantShop(mapHTML.children[c] , cardDOM);
+    // }
   }
   if (classType == 'peasant') {
     console.log("You've met a peasant.")
+    
   }
   return cardDOM
 }
@@ -823,14 +825,16 @@ function createMerchantShop (item, merchantCard){
   
   merchantCard.appendChild(shopItem)
   shopItem.addEventListener('click' , function(){
-    grabLoot(shopItem)
+    grabLoot(shopItem);
   });
 }
 
-function merhcantEncounter(merchants) {
+function merchantEncounter(merchants) {
   for( m = 0 ; m< merchants.length; m++){
-    
-    console.log(' MERCHANT ENCOUNTER:', );
+    let merchantDOM = createUnitCard(merchants[m], 10, 10, 'merchant', merchants[m].parentNode.getAttribute('id'))
+    for(i = 0 ; i < merchants[m].children.length ; i++) {
+      createMerchantShop(merchants[m].children[i] , merchantDOM);
+    }
   }
 }
 
@@ -850,6 +854,7 @@ function monsterEncounter(monsters) { // takes array of monsters
       lootBoxes = document.querySelector('#' + monsters[i].parentNode.getAttribute('id') + '-card-' + i).getElementsByClassName('loot');
       Array.from(lootBoxes).forEach(function (ele) {
         ele.style.display = 'flex';
+        console.log(ele);
 
         ele.addEventListener('click', function () {
           grabLoot(ele, ele.getAttribute('quantity'))
@@ -862,6 +867,8 @@ function monsterEncounter(monsters) { // takes array of monsters
 
 // looting 
 function grabLoot(lootElement, quantity) {
+
+  console.log(' : grab loot', );
   let grabbedLoot = document.createElement('li')
 
   if (lootElement.getAttribute('type') == 'gold') {
@@ -869,14 +876,36 @@ function grabLoot(lootElement, quantity) {
     grabbedLoot.setAttribute('quantity', lootElement.getAttribute('quantity'))
   }
   if (lootElement.getAttribute('type') == 'goods') {
-
-
     grabbedLoot.className = 'loot'
 
+    let equipBtn = document.createElement('button');
+      equipBtn.className = 'equipBtn';
+      equipBtn.innerHTML = 'Equip ';
 
+      grabbedLoot.innerHTML = lootElement.textContent
+      grabbedLoot.setAttribute('slot', lootElement.getAttribute('slot'))
+      grabbedLoot.append(equipBtn)
+      grabbedLoot.className = 'weapon';
+      grabbedLoot.setAttribute('grade', lootElement.getAttribute('grade'))
+      grabbedLoot.setAttribute('dmg', lootElement.getAttribute('dmg'));
+
+      //create stored weapon info 
+      atkInfo = document.createElement('li')
+      atkInfo.innerHTML = 'Attack: ' + grabbedLoot.getAttribute('dmg')
+      slotInfo = document.createElement('li')
+      slotInfo.innerHTML = 'Slot: ' + grabbedLoot.getAttribute('slot')
+
+      grabbedLoot.append(atkInfo, slotInfo)
+
+      document.querySelector('#inventory').appendChild(grabbedLoot)
+
+      equipBtn.addEventListener('click', function () {
+        equip(grabbedLoot)
+      })
+    
   }
   if (lootElement.getAttribute('type') == 'trash') {
-    grabbedLoot.className = 'trash'
+    let equipBtn 
   }
   if (lootElement.getAttribute('type') == 'wear') {
     if (lootElement.getAttribute('slot') == 'lhand') {
