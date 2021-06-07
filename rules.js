@@ -285,6 +285,7 @@ function cityRent (){
 //traded goods
 const createGoods = (type, amount = 1) => {
   let goods = document.createElement('p')
+  goods.className = 'loot'
   goods.innerHTML = type
   return goods
 }
@@ -307,7 +308,9 @@ class merchant {
   }
   createMerchant() {
     let m = document.createElement('div')
-    m.innerHTML = this.name
+    let nameSpan = document.createElement('span')
+    nameSpan.innerHTML =this.name
+    m.appendChild(nameSpan)
     m.setAttribute('wealth', this.wealth)
     m.setAttribute('trade', this.trade)
     m.setAttribute('todo', 'sell')
@@ -799,7 +802,7 @@ function createUnitCard(mapHTML, hp, atk, classType, id) {
   if (classType == 'merchant') {
     status("you have met merchant "+mapHTML.firstChild.textContent);
    
-    cardDOM.innerHTML = '<div class=' + classType + '_info"> <name>' + mapHTML.firstChild.textContent + "</name><span class=" + classType + "-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src=1.jpg>';
+    cardDOM.innerHTML = '<div class=' + classType + '_info"> <name>' + mapHTML.firstChild.textContent + "</name><span class=" + classType + "-info'>HP: " + hp + ' ATK: ' + atk + '</span></div> <img style="max-width:100px;" src='+mapHTML.firstChild.innerHTML+'.jpg>';
     document.querySelector('.monster-arena').appendChild(cardDOM)
     for(c = 0 ; c < mapHTML.children.length ; c++) {
       createMerchantShop(mapHTML.children[c] , cardDOM);
@@ -819,7 +822,9 @@ function createMerchantShop (item, merchantCard){
   shopItem.setAttribute('type', 'goods');
   
   merchantCard.appendChild(shopItem)
-  shopItem.addEventListener('click' , function(){grabLoot(shopItem)});
+  shopItem.addEventListener('click' , function(){
+    grabLoot(shopItem)
+  });
 }
 
 function merhcantEncounter(merchants) {
@@ -864,7 +869,11 @@ function grabLoot(lootElement, quantity) {
     grabbedLoot.setAttribute('quantity', lootElement.getAttribute('quantity'))
   }
   if (lootElement.getAttribute('type') == 'goods') {
-    grabbedLoot.className = 'goods'
+
+
+    grabbedLoot.className = 'loot'
+
+
   }
   if (lootElement.getAttribute('type') == 'trash') {
     grabbedLoot.className = 'trash'
