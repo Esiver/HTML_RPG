@@ -1047,26 +1047,34 @@ function unequip(grabbedLoot) {
 }
 
 function seasonsChange() {
+  var cosmos = document.getElementById('cosmos');
   var seasonMeter = document.getElementById('season-bar');
-  var seasonValue = seasonMeter.getAttribute('value');
-  if (seasonValue > 200){
-    seasonMeter.setAttribute('value', 1)
-  } 
+  var seasonValue = seasonMeter.getAttribute('date');
   
-  else if (seasonValue > 1 && seasonValue < 50) {
-    seasonMeter.setAttribute('value', Number(seasonValue)+1);
-    return 'spring'
-  } else if (seasonValue > 50 && seasonValue < 100) {
-    seasonMeter.setAttribute('value', Number(seasonValue)+1);
-    return 'summer'
-  } else if (seasonValue > 100 && seasonValue < 150) {
-    seasonMeter.setAttribute('value', Number(seasonValue)+1);
-    return 'autumn'
-  } else if (seasonValue > 150 && seasonValue < 200) {
-    seasonMeter.setAttribute('value', Number(seasonValue)+1);
-    return 'winter'
+  if (seasonValue > 200){
+    seasonValue = 0;
+    seasonMeter.setAttribute('date', 0)
+  } 
+  else if (seasonValue == 50) {
+    cosmos.innerHTML = 'Spring'
+    cosmos.style.backgroundImage = 'url(spring.jpg)'
+    villageYield();
+  } else if (seasonValue == 95) {
+    cosmos.innerText =  'Summer'
+    cosmos.style.backgroundImage = 'url(summer.jpg)'
+
+  } else if (seasonValue == 130) {
+    villageYield();
+    cosmos.innerText =  'Autumn'
+    cosmos.style.backgroundImage = 'url(autumn.jpg)'
+  } else if (seasonValue == 185) {
+    cosmos.innerText =  'Winter';
+    cosmos.style.backgroundImage = 'url(winter.jpg)'
   }
-  seasonMeter.innerHTML = seasonValue
+  seasonMeter.style.width = seasonValue/2 +'%';
+  seasonMeter.innerHTML = seasonValue;
+  seasonMeter.setAttribute('date', Number(seasonValue)+1);
+
   return true
 }
 
@@ -1075,7 +1083,7 @@ function GameCycle() {
   if (Game == true){
     if (seasonsChangeOn){
       seasonsChange();
-      villageYield();
+      
       if (cityRentOn){
         cityRent()
       }
@@ -1086,9 +1094,8 @@ function GameCycle() {
       merchantBehavior(Confucius)
     }
 
-
     checkStats();
-    setTimeout(GameCycle.bind({}), TIME_STEP*0.2)
+    setTimeout(GameCycle.bind({}), TIME_STEP*0.1)
   }
 }
 
