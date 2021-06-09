@@ -185,7 +185,7 @@ function createPeasant(village, x, y, id, quantity) {
     peasentArray[p] = new Peasant(village.innerHTML, 'fur', 100)
     populatePeasant = document.createElement('div')
     populatePeasant.className = 'peasant';
-    populatePeasant.innerHTML = id
+    populatePeasant.innerHTML = 'Peasant to '+id
     populatePeasant.setAttribute('trade', randomResource()) //maybe let peasant trade depend on surroundings? later!
     village.append(populatePeasant);
   }
@@ -264,8 +264,9 @@ for (c = 0; c < cities.length; c++) {
   furStore.className = 'storage'
 
   var stoneStore = document.createElement('div');
-  stoneStore.innerHTML = 'stone'
+  
   stoneStore.setAttribute('quantity', cities[c].resources[3])
+  stoneStore.innerHTML = 'stone';
   stoneStore.setAttribute('id', stoneStore.innerHTML)
   stoneStore.className = 'storage'
 
@@ -1045,29 +1046,59 @@ function unequip(grabbedLoot) {
   checkStats();
 }
 
+function seasonsChange() {
+  var seasonMeter = document.getElementById('season-bar');
+  var seasonValue = seasonMeter.getAttribute('value');
+  if (seasonValue > 200){
+    seasonMeter.setAttribute('value', 1)
+  } 
+  
+  else if (seasonValue > 1 && seasonValue < 50) {
+    seasonMeter.setAttribute('value', Number(seasonValue)+1);
+    return 'spring'
+  } else if (seasonValue > 50 && seasonValue < 100) {
+    seasonMeter.setAttribute('value', Number(seasonValue)+1);
+    return 'summer'
+  } else if (seasonValue > 100 && seasonValue < 150) {
+    seasonMeter.setAttribute('value', Number(seasonValue)+1);
+    return 'autumn'
+  } else if (seasonValue > 150 && seasonValue < 200) {
+    seasonMeter.setAttribute('value', Number(seasonValue)+1);
+    return 'winter'
+  }
+  seasonMeter.innerHTML = seasonValue
+  return true
+}
+
 //Game
 function GameCycle() {
   if (Game == true){
-    villageYield()
-    if (cityRentOn){
-      cityRent()
+    if (seasonsChangeOn){
+      seasonsChange();
+      villageYield();
+      if (cityRentOn){
+        cityRent()
+      }
     }
-    
     // merchantBehavior(...allMerchants)
     if (merchantBehaviorOn){
       merchantBehavior(Adam)
       merchantBehavior(Confucius)
     }
+
+
+    checkStats();
     setTimeout(GameCycle.bind({}), TIME_STEP*0.2)
   }
 }
+
 // Start Game
 check();
-checkStats();
 //peasantInVillage()
-let Game = true;
+let Game = false  ;
 let cityRentOn = true;
 let merchantBehaviorOn = true;
+let seasonsChangeOn = true;
 GameCycle();
 
 
