@@ -172,11 +172,8 @@ const peasantAtPosition = (position=playerPosition) => {
   return Array.from(document.querySelector(position).firstChild.getElementsByClassName('peasant'))
 }
 
-const peasantInVillage = () => { // todo
-  let villages = Array.from(document.getElementsByClassName('village'))
-  villages.forEach((village) => {
-    //console.log(village.childNodes[2])
-  })  
+const peasantsInDOM = (villageDOM) => { // todo
+  return villageDOM.getElementsByClassName('peasant');
 }
 
 function createPeasant(village, x, y, id, quantity) {
@@ -200,8 +197,17 @@ class Village {
   }
 }
 
+const getAllVillages = () => {
+  return Array.from(document.getElementsByClassName('village'))
+}
+
 function villageYield(){
- // todo  
+  // first get all villages in the world.
+  getAllVillages().forEach((village) => {
+    let peasants = peasantsInDOM(village);
+    console.log('----',peasants[0])
+  })
+  
 }
 //make cities
 for (c = 0; c < cities.length; c++) {
@@ -349,7 +355,8 @@ function merchantBehavior(merchant) {
       if ( merchant.getAttribute('todo')=='sell'){
         merchant.setAttribute('todo', 'buy');
       } else {merchant.setAttribute('todo', 'sell')}
-      merchant.setAttribute('towards', cities[randomNumber(0,4)].getAttribute('name'));
+      let newRoute = cities[randomNumber(0,4)].getAttribute('name');
+      merchant.setAttribute('towards', newRoute);
     }
     else if (merchant.getAttribute('towards') != '' ){
       ccc = Array.from(document.getElementsByClassName('city'))
@@ -1062,7 +1069,9 @@ function seasonsChange() {
   } else if (seasonValue == 95) {
     cosmos.innerText =  'Summer'
     cosmos.style.backgroundImage = 'url(summer.jpg)'
-
+    if (cityRentOn){
+        cityRent();
+    }
   } else if (seasonValue == 130) {
     villageYield();
     cosmos.innerText =  'Autumn'
@@ -1070,6 +1079,9 @@ function seasonsChange() {
   } else if (seasonValue == 185) {
     cosmos.innerText =  'Winter';
     cosmos.style.backgroundImage = 'url(winter.jpg)'
+    if (cityRentOn){
+      cityRent();
+    }
   }
   seasonMeter.style.width = seasonValue/2 +'%';
   seasonMeter.innerHTML = seasonValue;
@@ -1080,13 +1092,10 @@ function seasonsChange() {
 
 //Game
 function GameCycle() {
+  
   if (Game == true){
     if (seasonsChangeOn){
       seasonsChange();
-      
-      if (cityRentOn){
-        cityRent()
-      }
     }
     // merchantBehavior(...allMerchants)
     if (merchantBehaviorOn){
@@ -1101,6 +1110,7 @@ function GameCycle() {
 
 // Start Game
 check();
+cityRent(); // for some reason this needs to run once or else crash??
 //peasantInVillage()
 let Game = false  ;
 let cityRentOn = true;

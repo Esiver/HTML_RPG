@@ -14,6 +14,12 @@
   width: 300px;
   background-color: grey;
 }
+.map {
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-image: url("pillar.png") 30;
+  border-image-repeat: repeat;
+}
 #console {
   background-color: rgb(199, 199, 199);
   width: 100%;
@@ -182,15 +188,24 @@
 
 
 #season-bar{
+  text-align: right;
+  color: white;
+  text-shadow: 1px 1px 2px black, 0 0 1em black, 0 0 0.2em black;
   width: 100%;
+  margin: 3px;
   height: 25px;
   background-color: darkblue;
 }
 #cosmos {
-  transition: ease-in-out 1s;
+  
   font-size: x-large;
   font-weight: 800;
   text-shadow: 1px 1px 2px white, 0 0 1em white, 0 0 0.2em white;
   height: 250px;
   background-image: url('winter.jpg');
+  -webkit-transition: all 1.5s ease-in-out;
+  -moz-transition: all 1.5s ease-in-out;
+  -o-transition: all 1.5s ease-in-out;
+  transition: all 1.5s ease-in-out;
+  /* transition: all 2s; */
 }
