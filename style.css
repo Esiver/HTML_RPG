@@ -74,6 +74,12 @@
 .village .peasant {
   display: none;
 }
+.peasant {
+  position: absolute;
+  background-color: darkolivegreen;
+  height: var(--tile-height);
+  width: var(--tile-width);
+}
 .merchant{
 
   background-color: green;
@@ -83,7 +89,7 @@
   width: var(--tile-width);
 }
 .merchant p {
-  display: none;
+
 }
 .merchant-card {
   display: flex;

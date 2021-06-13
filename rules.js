@@ -52,7 +52,16 @@ const digitsToPosition = (oox, ooy) => {
 }
 
 const getUnitPosition = (unit) => {
-  pos0 = unit.parentNode.getAttribute('id')
+  // console.log('unit.parentNode.className', unit.parentNode.className)
+  var parent = unit.parentNode;
+  if (parent.className === 'village'){
+   
+    
+  } else {
+    pos0 = unit.parentNode.getAttribute('id')
+    
+    console.log('else')
+  }
   x = Number(pos0.charAt(4) + pos0.charAt(5) + pos0.charAt(6));
   y = Number(pos0.charAt(12) + pos0.charAt(13) + pos0.charAt(14));
   return [x,y]
@@ -70,6 +79,15 @@ const randomResource = () => {
 
 const merchantAtPosition = () => {
   return Array.from(document.querySelector(playerPosition).getElementsByClassName('merchant'))
+}
+
+
+
+const getCityByName = (searchName) => {
+  let foundCity = allCities.filter((city) => {
+    return city.getAttribute('name') == searchName
+  })
+  return foundCity
 }
 
 // -------------------------------------------------------------
@@ -182,11 +200,35 @@ function createPeasant(village, x, y, id, quantity) {
     peasentArray[p] = new Peasant(village.innerHTML, 'fur', 100)
     populatePeasant = document.createElement('div')
     populatePeasant.className = 'peasant';
+    populatePeasant.setAttribute('city', id)
+    populatePeasant.setAttribute('todo', 'farm')
     populatePeasant.innerHTML = 'Peasant to '+id
     populatePeasant.setAttribute('trade', randomResource()) //maybe let peasant trade depend on surroundings? later!
     village.append(populatePeasant);
   }
 }
+
+const allPeasants = document.getElementsByClassName('peasant');
+
+function peasantBehavior(peasant) {
+
+
+
+  var tradingPeasants = Array.from(allPeasants).filter(peasant => peasant.getAttribute('todo') == 'trade' )
+  tradingPeasants.forEach((peasant)=>{
+    ccc = Array.from(document.getElementsByClassName('city'))
+    towards = ccc.filter(city => {
+      return city.getAttribute('name') === peasant.getAttribute('city')
+    })
+    moveUnitTowards(peasant, towards[0])
+  })
+  // Array.from(peasants).forEach((peasant) => {
+  //   if (peasant.getAttribute('todo') == 'farm') {
+  //    } else if (peasant.getAttribute('todo') == 'trade') {
+  //      console.log(peasant)
+  //    }
+  // })
+ }
 
 //the peasents live in villages!
 class Village {
@@ -204,8 +246,12 @@ const getAllVillages = () => {
 function villageYield(){
   // first get all villages in the world.
   getAllVillages().forEach((village) => {
-    let peasants = peasantsInDOM(village);
-    console.log('----',peasants[0])
+    let peasantsInVillage = Array.from(peasantsInDOM(village));
+    let chosenOne = peasantsInVillage[randomNumber(0, peasantsInVillage.length)];
+    let peasantDestination = chosenOne.getAttribute('city');
+    // console.log(peasantDestination)
+    // moveUnitTowards(chosenOne, getCityByName(peasantDestination)[0] )
+    chosenOne.setAttribute('todo', 'trade')
   })
   
 }
@@ -262,6 +308,7 @@ for (c = 0; c < cities.length; c++) {
     createPeasant(village, vil_x_cord, vil_y_cord, cities[c].name, randomNumber(10, 15))
   }
 
+  
   //storage?
   var furStore = document.createElement('div');
   furStore.innerHTML = 'fur'
@@ -288,6 +335,8 @@ function cityRent (){
     cities[c].setAttribute('wealth', Number(cities[c].getAttribute('wealth'))+totalRent)
   }
 }
+//all cities for convenience
+const allCities = Array.from(document.getElementsByClassName('city'))
 
 //traded goods
 const createGoods = (type, amount = 1) => {
@@ -1103,6 +1152,9 @@ function GameCycle() {
       merchantBehavior(Confucius)
     }
 
+    
+    peasantBehavior()
+
     checkStats();
     setTimeout(GameCycle.bind({}), TIME_STEP*0.1)
   }
@@ -1110,7 +1162,7 @@ function GameCycle() {
 
 // Start Game
 check();
-cityRent(); // for some reason this needs to run once or else crash??
+cityRent(); // for some reason this needs to run once / initialize or else crash??
 //peasantInVillage()
 let Game = false  ;
 let cityRentOn = true;
