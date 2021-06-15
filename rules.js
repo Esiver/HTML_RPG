@@ -216,11 +216,14 @@ function peasantBehavior(peasant) {
 
   var tradingPeasants = Array.from(allPeasants).filter(peasant => peasant.getAttribute('todo') == 'trade' )
   tradingPeasants.forEach((peasant)=>{
-    ccc = Array.from(document.getElementsByClassName('city'))
-    towards = ccc.filter(city => {
-      return city.getAttribute('name') === peasant.getAttribute('city')
-    })
-    moveUnitTowards(peasant, towards[0])
+    if (peasant.parentElement.childNodes == "city") { // TODO
+      console.log('big city lights')
+    } else {
+      towards = allCities.filter(city => {
+        return city.getAttribute('name') === peasant.getAttribute('city')
+      })
+      moveUnitTowards(peasant, towards[0])
+    }
   })
   // Array.from(peasants).forEach((peasant) => {
   //   if (peasant.getAttribute('todo') == 'farm') {
@@ -1152,8 +1155,10 @@ function GameCycle() {
       merchantBehavior(Confucius)
     }
 
+    if (peasantBehaviorOn){
+      peasantBehavior()
+    }
     
-    peasantBehavior()
 
     checkStats();
     setTimeout(GameCycle.bind({}), TIME_STEP*0.1)
@@ -1164,6 +1169,7 @@ function GameCycle() {
 check();
 cityRent(); // for some reason this needs to run once / initialize or else crash??
 //peasantInVillage()
+let peasantBehaviorOn = true;
 let Game = false  ;
 let cityRentOn = true;
 let merchantBehaviorOn = true;
@@ -1173,6 +1179,14 @@ GameCycle();
 
 // Admin stuff
 merchantBehaviorBtn = document.getElementById('ADMIN_merchantBehavior')
+peasantBehaviorBtn = document.getElementById('ADMIN_peasantBehavior')
+peasantBehaviorBtn.addEventListener('click', function () {
+  peasantBehaviorToggle()}
+  );
+function peasantBehaviorToggle () {
+  peasantBehaviorOn = !peasantBehaviorOn; 
+  console.log(' :', peasantBehaviorOn);
+}
 merchantBehaviorBtn.addEventListener('click', function () {
   merchantBehaviorToggle()}
   );
